@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NU7 readiness</title>
+<meta name="description" content="Which Zcash wallets, libraries, bridges and swaps are ready for NU7, from public evidence. Read-only, updated hourly.">
+<style>
+  :root {
+    --bg: #070b22; --deep: #04061a; --panel: #0c1236; --line: rgba(154, 163, 199, 0.2);
+    --ink: #f4f1e8; --mute: #9aa3c7; --lime: #ddf24a; --amber: #ffb547; --red: #ff6b6b; --blue: #8fb4ff;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: radial-gradient(1100px 600px at 80% -10%, rgba(42, 59, 214, 0.28), transparent 60%), var(--deep); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  a { color: var(--lime); }
+  main { max-width: 1040px; margin: 0 auto; padding: 40px 16px 64px; }
+  .kicker { font: 600 13px/1 var(--mono); letter-spacing: 0.18em; text-transform: uppercase; color: var(--mute); margin: 0 0 12px; }
+  h1 { font-size: clamp(30px, 6vw, 46px); line-height: 1.1; margin: 0 0 12px; }
+  h2 { font-size: 20px; margin: 40px 0 12px; }
+  .lead { color: var(--mute); max-width: 720px; margin: 0 0 24px; }
+  .mono { font-family: var(--mono); }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
+  .clock { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 16px; }
+  .clock div span { display: block; font: 600 12px var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--mute); }
+  .clock div strong { font: 700 22px var(--mono); }
+  .banner { border-radius: 12px; padding: 12px 16px; margin: 16px 0 0; font-size: 15px; }
+  .banner.stale { background: rgba(255, 181, 71, 0.12); border: 1px solid var(--amber); color: var(--amber); }
+  .banner.active { background: rgba(221, 242, 74, 0.1); border: 1px solid var(--lime); color: var(--lime); }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0 16px; }
+  .filters button { background: transparent; color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; font: 600 14px system-ui, sans-serif; cursor: pointer; min-height: 40px; }
+  .filters button[aria-pressed="true"] { border-color: var(--lime); color: var(--lime); }
+  .rows { display: grid; gap: 12px; }
+  .row { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; }
+  .row header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 12px; }
+  .row h3 { font-size: 18px; margin: 0; }
+  .cat { color: var(--mute); font: 13px var(--mono); }
+  .pill { margin-left: auto; font: 700 12px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; border-radius: 999px; padding: 4px 10px; border: 1px solid; white-space: nowrap; }
+  .s-fixed { color: var(--lime); border-color: var(--lime); }
+  .s-in-review { color: var(--blue); border-color: var(--blue); }
+  .s-broken { color: var(--red); border-color: var(--red); }
+  .s-watch { color: var(--amber); border-color: var(--amber); }
+  .s-unknown { color: var(--mute); border-color: var(--mute); }
+  .row p { margin: 10px 0 8px; color: var(--ink); }
+  .row ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+  .row li { font-size: 14px; color: var(--mute); overflow-wrap: anywhere; }
+  .row li b { font: 600 12px var(--mono); letter-spacing: 0.04em; text-transform: uppercase; margin-right: 6px; color: var(--ink); }
+  .legend { display: grid; gap: 8px; padding: 0; list-style: none; }
+  .legend li { display: flex; gap: 10px; align-items: baseline; }
+  .legend .pill { margin-left: 0; }
+  ol.facts { padding-left: 20px; }
+  ol.facts li { margin-bottom: 6px; }
+  footer { margin-top: 48px; color: var(--mute); font-size: 14px; border-top: 1px solid var(--line); padding-top: 20px; }
+  .error { color: var(--red); }
+</style>
+</head>
+<body>
+<main>
+  <p class="kicker">Zcash · NU7 · read-only</p>
+  <h1>Who is ready for NU7?</h1>
+  <p class="lead">At NU7, every version 4 Zcash transaction becomes invalid and signers need the new consensus branch ID
+    <span class="mono">0x77190AD9</span>. This board tracks wallets, libraries, bridges and swaps from public evidence:
+    GitHub issues, pull requests, releases and source code, re-checked every hour.</p>
+
+  <section class="panel" aria-label="Activation countdown">
+    <div class="clock">
+      <div><span>Activation height</span><strong class="mono">3,543,405</strong></div>
+      <div><span>Current height</span><strong id="tip">…</strong></div>
+      <div><span>Blocks to go</span><strong id="left">…</strong></div>
+      <div><span>Estimated time (UTC)</span><strong id="eta">…</strong></div>
+    </div>
+    <div id="banners"></div>
+  </section>
+
+  <div class="filters" role="group" aria-label="Filter by status" id="filters"></div>
+  <div class="rows" id="rows"><p class="muted">Loading the latest check…</p></div>
+
+  <h2>What the statuses mean</h2>
+  <ul class="legend">
+    <li><span class="pill s-fixed">Fixed</span><span>A fix is merged, a release is published, the source has the NU7 change, or the issue was closed as done. A release or deploy to users may still be pending; the note says when.</span></li>
+    <li><span class="pill s-in-review">In review</span><span>A fix is open and not merged yet.</span></li>
+    <li><span class="pill s-broken">Broken</span><span>An open issue or the current source code shows the problem, and no fix is open.</span></li>
+    <li><span class="pill s-watch">Watch</span><span>No machine-checkable evidence either way: a dated report, a conflicting source or a related change.</span></li>
+    <li><span class="pill s-unknown">Unknown</span><span>A lookup failed this hour. A failed lookup never counts as fixed or broken.</span></li>
+  </ul>
+
+  <h2>What NU7 changes for integrators</h2>
+  <ol class="facts">
+    <li><b>Version 4 transactions are rejected</b> from activation, transparent-only ones included (ZIP 2003). Build v5 or v6.</li>
+    <li><b>New consensus branch ID</b> <span class="mono">0x77190AD9</span>. v5 and v6 signatures commit to it, so a signer with old constants fails even if it already builds v5.</li>
+    <li><b>Blocks every 25 seconds</b> instead of 75 (ZIP 218). The same number of confirmations now takes a third of the time.</li>
+    <li><b>Sprout funds become unspendable</b>, because Sprout can only be spent in a v4 transaction.</li>
+  </ol>
+  <p class="muted">Source: <a href="https://zips.z.cash/zip-0259">ZIP 259</a>. Zebra 7.0.0 is the node release that activates NU7; Zebra 6.4.x stops itself around 2 November.</p>
+
+  <footer>
+    <p id="checked">Last checked: …</p>
+    <p>Read-only: this page and its checker only read public data (GitHub and the Blockchair explorer). The countdown assumes 75-second blocks until activation. Rows and the rules behind each status are in <a href="https://github.com/cryppit/nu7-readiness">github.com/cryppit/nu7-readiness</a>; corrections are welcome as issues there.</p>
+    <p>Run by <a href="https://github.com/cryppit">Cryppit</a>. Cryppit filed some of the linked items (vultisig-android #6115 and grant application ZCG #513) and has a grant application in review for the Vultisig/SwapKit swap path.</p>
+  </footer>
+</main>
+<script>
+"use strict";
+const STALE_MS = 3 * 60 * 60 * 1000;
+const LABEL = { fixed: "Fixed", "in-review": "In review", broken: "Broken", watch: "Watch", unknown: "Unknown" };
+const ORDER = ["broken", "in-review", "watch", "unknown", "fixed"];
+const KIND = { blocker: "Issue", fix: "Fix", release: "Release", code: "Code", context: "Related", manual: "Report" };
+const STATE = {
+  open: "open", merged: "merged", closed: "closed, not merged", completed: "closed as done", not_planned: "closed as not planned",
+  released: "published", absent: "not published", found: "found", not_found: "not found", error: "lookup failed", noted: "noted",
+};
+let data = null;
+let filter = "all";
+
+function el(tag, attrs, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) n.setAttribute(k, v);
+  for (const k of kids) n.append(k);
+  return n;
+}
+function fmt(n) { return n == null ? "unavailable" : Number(n).toLocaleString("en-US"); }
+function day(s) { return s ? s.slice(0, 10) : ""; }
+
+function signalItem(s) {
+  let state = STATE[s.state] || s.state;
+  if (s.kind === "context" && (s.state === "completed" || s.state === "not_planned")) state = "closed";
+  const text = s.label || s.title || s.ref;
+  const li = el("li", {}, el("b", {}, KIND[s.kind] || s.kind));
+  const a = el("a", { href: s.url, rel: "noopener" }, s.ref || text);
+  li.append(a, document.createTextNode(` · ${state}`));
+  if (s.kind !== "manual" && text && text !== s.ref) li.append(document.createTextNode(` · ${text}`));
+  if (s.kind === "manual") li.append(document.createTextNode(` · ${s.label} · checked ${s.checked}`));
+  if (s.updated_at) li.append(document.createTextNode(` · updated ${day(s.updated_at)}`));
+  return li;
+}
+
+function render() {
+  const rows = document.getElementById("rows");
+  rows.replaceChildren();
+  const list = data.rows
+    .filter((r) => filter === "all" || r.status === filter)
+    .sort((a, b) => ORDER.indexOf(a.status) - ORDER.indexOf(b.status) || a.name.localeCompare(b.name));
+  for (const r of list) {
+    const card = el("article", { class: "row", id: r.id },
+      el("header", {}, el("h3", {}, r.name), el("span", { class: "cat" }, r.category), el("span", { class: `pill s-${r.status}` }, LABEL[r.status])),
+      el("p", {}, r.note),
+      el("ul", {}, ...r.signals.map(signalItem)));
+    rows.append(card);
+  }
+  if (!list.length) rows.append(el("p", { class: "muted" }, "Nothing in this group right now."));
+  for (const b of document.querySelectorAll("#filters button")) b.setAttribute("aria-pressed", String(b.dataset.f === filter));
+}
+
+function filters() {
+  const box = document.getElementById("filters");
+  const groups = [["all", `All (${data.rows.length})`], ...ORDER.map((s) => [s, `${LABEL[s]} (${data.counts[s] || 0})`])];
+  for (const [f, text] of groups) {
+    const b = el("button", { type: "button", "data-f": f, "aria-pressed": "false" }, text);
+    b.addEventListener("click", () => { filter = f; render(); });
+    box.append(b);
+  }
+}
+
+function header() {
+  const c = data.chain || {};
+  document.getElementById("tip").textContent = fmt(c.tip);
+  document.getElementById("left").textContent = c.tip == null ? "unavailable" : fmt(c.blocks_left);
+  document.getElementById("eta").textContent = c.active ? "activated" : c.eta_utc ? `~${c.eta_utc.slice(0, 16).replace("T", " ")}` : "unavailable";
+  const banners = document.getElementById("banners");
+  if (c.active) banners.append(el("p", { class: "banner active" }, "NU7 is active on Mainnet. Version 4 transactions are now rejected."));
+  const age = Date.now() - Date.parse(data.checked_at);
+  if (!(age < STALE_MS)) banners.append(el("p", { class: "banner stale" }, `Stale: this data is from ${data.checked_at.replace("T", " ").replace("Z", " UTC")}, more than 3 hours ago. Statuses may have changed.`));
+  if (c.error) banners.append(el("p", { class: "banner stale" }, "The chain height could not be read in the last check."));
+  document.getElementById("checked").textContent = `Last checked: ${data.checked_at.replace("T", " ").replace("Z", " UTC")}`;
+}
+
+fetch("data/status.json", { cache: "no-store" })
+  .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+  .then((d) => { data = d; header(); filters(); render(); })
+  .catch((e) => {
+    document.getElementById("rows").replaceChildren(el("p", { class: "error" }, `The latest check could not be loaded (${e.message}).`));
+  });
+</script>
+</body>
+</html>

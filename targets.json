@@ -1,0 +1,194 @@
+{
+ "about": "Rows the checker evaluates. Signal kinds: blocker (issue: open = broken), fix (PR: merged = fixed, open = in review), release (owner/repo@tag published = fixed), code (owner/repo:path on the default branch; a regex that means fixed or broken), context (shown, never decides), manual (a dated note with a link). Evidence verified 2026-10-24.",
+ "rows": [
+  {
+   "id": "trust-wallet-core",
+   "name": "Trust Wallet Core",
+   "category": "Signing library",
+   "note": "Builds only v4 Zcash transactions, which NU7 makes invalid. Apps that embed it (Trust Wallet, Vultisig and others) cannot send transparent ZEC after activation until a v5 release ships.",
+   "signals": [
+    {"kind": "code", "ref": "trustwallet/wallet-core:rust/chains/tw_zcash/src/modules/transaction_builder.rs", "pattern": "TRANSACTION_VERSION_4", "means": "broken", "label": "Transaction builder still sets version 4"},
+    {"kind": "blocker", "ref": "trustwallet/wallet-core#4910"},
+    {"kind": "context", "ref": "ZcashCommunityGrants/zcashcommunitygrants#511", "label": "Grant application for a Wallet Core v5 repair (under review)"}
+   ]
+  },
+  {
+   "id": "vultisig-swapkit",
+   "name": "Vultisig Android: SwapKit ZEC swaps",
+   "category": "Swap",
+   "note": "ZEC-source swaps through SwapKit are signed as Sapling v4 with ZIP-243 digests, and v5 is rejected. The provider builds the transaction, so a fix needs SwapKit as well as the app.",
+   "signals": [
+    {"kind": "code", "ref": "vultisig/vultisig-android:data/src/main/kotlin/com/vultisig/wallet/data/chains/helpers/SwapKitZcashSigner.kt", "pattern": "v5[\\s*]+NU5\\s+hard-rejected", "means": "broken", "label": "Signer accepts Sapling v4 only"},
+    {"kind": "blocker", "ref": "vultisig/vultisig-android#6115"},
+    {"kind": "context", "ref": "ZcashCommunityGrants/zcashcommunitygrants#513", "label": "Grant application for v5 swap signing (under review)"}
+   ]
+  },
+  {
+   "id": "swapkit-trezor",
+   "name": "SwapKit: Trezor ZEC signing",
+   "category": "Swap",
+   "note": "Moves SwapKit's Trezor Zcash signing to v5, so ZEC received in v6 transactions can be spent.",
+   "signals": [
+    {"kind": "fix", "ref": "swapkit/wallets#189"}
+   ]
+  },
+  {
+   "id": "trezor-firmware",
+   "name": "Trezor firmware: v4 path for third-party apps",
+   "category": "Hardware wallet",
+   "note": "Firmware still sends non-v5 Zcash requests to a v4 signer. Trezor says Suite is unaffected because Connect always asks for v5; third-party integrations that pass version 4 are the ones at risk.",
+   "signals": [
+    {"kind": "blocker", "ref": "trezor/trezor-firmware#8040"}
+   ]
+  },
+  {
+   "id": "zondax-ledger",
+   "name": "Zondax Ledger app (ledger-zcash)",
+   "category": "Hardware wallet",
+   "note": "No NU7 change found in the repository. Its NU6.3 branch-ID update has been open since 8 Sep.",
+   "signals": [
+    {"kind": "context", "ref": "Zondax/ledger-zcash#143", "label": "NU6.3 branch-ID update (not NU7)"}
+   ]
+  },
+  {
+   "id": "noir",
+   "name": "Noir Wallet",
+   "category": "Wallet",
+   "note": "Every Zcash send has failed on Testnet since NU7 activated there (4 Oct), reproduced again on v1.0.39 on 22 Oct. The same failure reaches Mainnet at activation unless fixed.",
+   "signals": [
+    {"kind": "blocker", "ref": "NoirWallet/noir-wallet-sdk#23"}
+   ]
+  },
+  {
+   "id": "zingolib",
+   "name": "Zingo (zingolib)",
+   "category": "Wallet",
+   "note": "Testnet wallets failed with \"invalid consensus branch id 0x77190ad9\" after Testnet NU7; the issue was closed as fixed. Whether the fix is in a Mainnet release is not checked here.",
+   "signals": [
+    {"kind": "blocker", "ref": "zingolabs/zingolib#2859"}
+   ]
+  },
+  {
+   "id": "zodl-android",
+   "name": "Zodl Android SDK",
+   "category": "Wallet SDK",
+   "note": "SDK 5.2.2 has no NU7 Mainnet activation height. The open PR moves it to the stable librustzcash crates that carry it.",
+   "signals": [
+    {"kind": "blocker", "ref": "zodl-inc/zodl-android-wallet-sdk#45"},
+    {"kind": "blocker", "ref": "zodl-inc/zodl-android-wallet-sdk#37"},
+    {"kind": "fix", "ref": "zodl-inc/zodl-android-wallet-sdk#46"}
+   ]
+  },
+  {
+   "id": "edge",
+   "name": "Edge (react-native-zcash)",
+   "category": "Wallet",
+   "note": "Rebuilds Edge's Zcash SDKs on the final NU7 crates.",
+   "signals": [
+    {"kind": "fix", "ref": "EdgeApp/react-native-zcash#76"}
+   ]
+  },
+  {
+   "id": "zapp",
+   "name": "Zapp (iOS SDK fork)",
+   "category": "Wallet",
+   "note": "The open PR signs Testnet transactions with the librustzcash NU7 pre-releases; a Mainnet build is a separate step.",
+   "signals": [
+    {"kind": "fix", "ref": "JustZappIt/zcash-swift-wallet-sdk#1"}
+   ]
+  },
+  {
+   "id": "webzjs",
+   "name": "WebZjs (MetaMask Snap)",
+   "category": "Wallet",
+   "note": "An unmodified build could not sync on the NU7 Testnet; the maintainers said they would redeploy after NU7.",
+   "signals": [
+    {"kind": "manual", "label": "Forum report and maintainer reply", "url": "https://forum.zcashcommunity.com/t/57655/20", "checked": "2026-10-24"}
+   ]
+  },
+  {
+   "id": "zns",
+   "name": "ZNS mint",
+   "category": "App",
+   "note": "Pins a pre-release Zcash stack that has no Mainnet NU7 height.",
+   "signals": [
+    {"kind": "blocker", "ref": "zcashme/zns-mint#378"}
+   ]
+  },
+  {
+   "id": "omni-zec",
+   "name": "NEAR Omni Bridge: ZEC",
+   "category": "Bridge",
+   "note": "The NU7 height is a contract constant, so the new contracts must be deployed on NEAR before block 3,543,405. A merged PR is not yet a deploy.",
+   "signals": [
+    {"kind": "fix", "ref": "Near-One/btc-bridge#104"},
+    {"kind": "fix", "ref": "Near-One/btc-light-client-contract#157"}
+   ]
+  },
+  {
+   "id": "thorchain",
+   "name": "THORChain ZEC",
+   "category": "Swap",
+   "note": "ZEC trading was halted around 19 Oct after an outbound matching bug; the fix is in THORChain v3.21.0 (about 23 Oct). No NU7-specific notice found.",
+   "signals": [
+    {"kind": "manual", "label": "Halt and fix report", "url": "https://cryptobriefing.com/thorchain-halts-zec-swaps-rune-bug/", "checked": "2026-10-24"}
+   ]
+  },
+  {
+   "id": "maya",
+   "name": "Maya Protocol ZEC",
+   "category": "Swap",
+   "note": "The network halted after a 19 Aug exploit, yet a Maya ZEC route was still quoted on 23 Oct. The sources conflict; treat the route as unconfirmed.",
+   "signals": [
+    {"kind": "manual", "label": "Exploit and halt report", "url": "https://crypto.news/maya-protocol-suffers-1-7-million-exploit-halts-network/", "checked": "2026-10-24"}
+   ]
+  },
+  {
+   "id": "mining-infra",
+   "name": "sovright mining-infra",
+   "category": "Mining",
+   "note": "Open checklist of mining-infrastructure work to finish before Mainnet activation.",
+   "signals": [
+    {"kind": "blocker", "ref": "sovright/mining-infra#121"}
+   ]
+  },
+  {
+   "id": "bitgo",
+   "name": "BitGo (wasm-utxo)",
+   "category": "Custody",
+   "note": "The NU7 branch ID is merged in wasm-utxo, which BitGoJS defers to for NU6.2 and later. The BitGoJS PR was closed without merging.",
+   "signals": [
+    {"kind": "fix", "ref": "BitGo/BitGoWASM#420"},
+    {"kind": "code", "ref": "BitGo/BitGoWASM:packages/wasm-utxo/src/zcash/mod.rs", "pattern": "(?i)0x77190ad9", "means": "fixed", "label": "NU7 branch ID present"},
+    {"kind": "context", "ref": "BitGo/BitGoJS#9896", "label": "BitGoJS PR (closed, not merged)"}
+   ]
+  },
+  {
+   "id": "valar-fork",
+   "name": "librustzcash fork with an early NU7 ID",
+   "category": "Signing library",
+   "note": "An early fork exposed NU7 as 0x77190AD8. The final ID is 0x77190AD9, so anything built on that pre-release carries the wrong value.",
+   "signals": [
+    {"kind": "context", "ref": "valargroup/librustzcash#76", "label": "Exposes NU7 as 0x77190AD8"}
+   ]
+  },
+  {
+   "id": "librustzcash",
+   "name": "librustzcash crates",
+   "category": "Signing library",
+   "note": "The NU7 Mainnet crate releases are out; wallets built on them still have to ship their own releases.",
+   "signals": [
+    {"kind": "fix", "ref": "zcash/librustzcash#3188"}
+   ]
+  },
+  {
+   "id": "zebra",
+   "name": "Zebra node",
+   "category": "Node",
+   "note": "Zebra 7.0.0 activates NU7 at 3,543,405 and is supported for 8 weeks. Zebra 6.4.x stops itself around 2 Nov, so nodes must upgrade before then.",
+   "signals": [
+    {"kind": "release", "ref": "ZcashFoundation/zebra@v7.0.0"}
+   ]
+  }
+ ]
+}
