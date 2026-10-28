@@ -101,8 +101,10 @@
    "id": "webzjs",
    "name": "WebZjs (MetaMask Snap)",
    "category": "Wallet",
-   "note": "An unmodified build could not sync on the NU7 Testnet; the maintainers said they would redeploy after NU7.",
+   "note": "Still built on ChainSafe's NU6.1 fork of librustzcash (last commit April 2026), so it has neither NU6.3 nor NU7; a user reported in June that shielding is rejected for an incorrect consensus branch ID. The maintainers said on the forum they would redeploy after NU7.",
    "signals": [
+    {"kind": "blocker", "ref": "ChainSafe/WebZjs#166"},
+    {"kind": "code", "ref": "ChainSafe/WebZjs:Cargo.toml", "pattern": "librustzcash-nu61", "means": "broken", "label": "Built on an NU6.1 librustzcash fork"},
     {"kind": "manual", "label": "Forum report and maintainer reply", "url": "https://forum.zcashcommunity.com/t/57655/20", "checked": "2026-10-24"}
    ]
   },
@@ -110,9 +112,10 @@
    "id": "zns",
    "name": "ZNS mint",
    "category": "App",
-   "note": "Pins a pre-release Zcash stack that has no Mainnet NU7 height.",
+   "note": "Moved to the final NU7 crates (zcash_protocol 0.11, which carries the Mainnet height) in a PR merged 26 Oct; the older tracking issue was left open.",
    "signals": [
-    {"kind": "blocker", "ref": "zcashme/zns-mint#378"}
+    {"kind": "fix", "ref": "zcashme/zns-mint#390"},
+    {"kind": "context", "ref": "zcashme/zns-mint#378", "label": "Older tracking issue (still open)"}
    ]
   },
   {
@@ -147,7 +150,7 @@
    "id": "mining-infra",
    "name": "sovright mining-infra",
    "category": "Mining",
-   "note": "Open checklist of mining-infrastructure work to finish before Mainnet activation.",
+   "note": "Open checklist of mining-infrastructure work to finish before Mainnet activation. The final NU7 crates and the pre-activation peer floor merged on 26 Oct (#128, #129); 16 of 27 checklist items were still open on 28 Oct, including relay and pool-server qualification on NU7 blocks.",
    "signals": [
     {"kind": "blocker", "ref": "sovright/mining-infra#121"}
    ]
