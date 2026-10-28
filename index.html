@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NU7 readiness</title>
-<meta name="description" content="Which Zcash wallets, libraries, bridges and swaps are ready for NU7, from public evidence. Read-only, updated hourly.">
+<meta name="description" content="Which Zcash wallets, libraries, bridges and swaps are ready for NU7, from public evidence. Read-only, re-checked several times a day.">
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta property="og:type" content="website">
 <meta property="og:title" content="NU7 readiness: is your Zcash wallet ready?">
-<meta property="og:description" content="Which Zcash wallets, libraries, bridges and swaps are ready for NU7, from public evidence. Re-checked hourly, by Cryppit.">
+<meta property="og:description" content="Which Zcash wallets, libraries, bridges and swaps are ready for NU7, from public evidence. Re-checked several times a day, by Cryppit.">
 <meta property="og:url" content="https://cryppit.github.io/nu7-readiness/">
 <meta property="og:image" content="https://cryppit.github.io/nu7-readiness/icons/og.png">
 <meta property="og:image:width" content="1200">
@@ -72,7 +72,7 @@
   <h1>Who is ready for NU7?</h1>
   <p class="lead">At NU7, every version 4 Zcash transaction becomes invalid and signers need the new consensus branch ID
     <span class="mono">0x77190AD9</span>. This board tracks wallets, libraries, bridges and swaps from public evidence:
-    GitHub issues, pull requests, releases and source code, re-checked every hour.</p>
+    GitHub issues, pull requests, releases and source code, re-checked several times a day; the time of the last check is shown.</p>
 
   <section class="panel" aria-label="Activation countdown">
     <div class="clock">
@@ -113,7 +113,7 @@
 </main>
 <script>
 "use strict";
-const STALE_MS = 3 * 60 * 60 * 1000;
+const STALE_MS = 8 * 60 * 60 * 1000;
 const LABEL = { fixed: "Fixed", "in-review": "In review", broken: "Broken", watch: "Watch", unknown: "Unknown" };
 const ORDER = ["broken", "in-review", "watch", "unknown", "fixed"];
 const KIND = { blocker: "Issue", fix: "Fix", release: "Release", code: "Code", context: "Related", manual: "Report" };
@@ -181,7 +181,7 @@ function header() {
   const banners = document.getElementById("banners");
   if (c.active) banners.append(el("p", { class: "banner active" }, "NU7 is active on Mainnet. Version 4 transactions are now rejected."));
   const age = Date.now() - Date.parse(data.checked_at);
-  if (!(age < STALE_MS)) banners.append(el("p", { class: "banner stale" }, `Stale: this data is from ${data.checked_at.replace("T", " ").replace("Z", " UTC")}, more than 3 hours ago. Statuses may have changed.`));
+  if (!(age < STALE_MS)) banners.append(el("p", { class: "banner stale" }, `Stale: this data is from ${data.checked_at.replace("T", " ").replace("Z", " UTC")}, more than 8 hours ago. Statuses may have changed.`));
   if (c.error) banners.append(el("p", { class: "banner stale" }, "The chain height could not be read in the last check."));
   document.getElementById("checked").textContent = `Last checked: ${data.checked_at.replace("T", " ").replace("Z", " UTC")}`;
 }

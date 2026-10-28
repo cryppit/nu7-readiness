@@ -4,7 +4,7 @@ Which Zcash wallets, libraries, bridges and swaps are ready for NU7, from public
 
 NU7 activates on Mainnet at block **3,543,405** (around 5–6 November 2026, [ZIP 259](https://zips.z.cash/zip-0259)). From
 that block every version 4 transaction is invalid, and signers need the new consensus branch ID `0x77190AD9`. This board
-re-checks each project every hour and shows what the evidence says, with a link for every claim.
+re-checks each project several times a day and shows what the evidence says, with a link for every claim.
 
 ## How a status is decided
 
@@ -35,7 +35,7 @@ python3 check.py                    # writes data/status.json (set GITHUB_TOKEN 
 python3 -m http.server              # then open http://localhost:8000
 ```
 
-GitHub Actions runs the tests and the checker every hour and publishes the page to GitHub Pages.
+GitHub Actions runs the tests and the checker on an hourly schedule (GitHub often runs it only every few hours) and on every push, and publishes the page to GitHub Pages.
 
 ## Corrections
 
