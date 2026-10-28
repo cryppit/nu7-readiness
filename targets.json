@@ -1,5 +1,5 @@
 {
- "about": "Rows the checker evaluates. Signal kinds: blocker (issue: open = broken), fix (PR: merged = fixed, open = in review), release (owner/repo@tag published = fixed), code (owner/repo:path on the default branch; a regex that means fixed or broken), context (shown, never decides), manual (a dated note with a link). Evidence verified 2026-10-24.",
+ "about": "Rows the checker evaluates. Signal kinds: blocker (issue: open = broken), fix (PR: merged = fixed, open = in review), release (owner/repo@tag published = fixed), code (owner/repo:path on the default branch; a regex that means fixed or broken), context (shown, never decides), manual (a dated note with a link). Evidence verified 2026-10-24; rows added and re-verified 2026-10-28.",
  "rows": [
   {
    "id": "trust-wallet-core",
@@ -188,6 +188,123 @@
    "note": "Zebra 7.0.0 activates NU7 at 3,543,405 and is supported for 8 weeks. Zebra 6.4.x stops itself around 2 Nov, so nodes must upgrade before then.",
    "signals": [
     {"kind": "release", "ref": "ZcashFoundation/zebra@v7.0.0"}
+   ]
+  },
+  {
+   "id": "keystone",
+   "name": "Keystone 3 firmware",
+   "category": "Hardware wallet",
+   "note": "Firmware 3.2.0 (23 Oct) is built on zcash_protocol 0.10.0, which has no NU7 branch ID, and its transparent signing path treats a transaction with a branch ID it does not know as unsupported. No NU7 issue or PR found.",
+   "signals": [
+    {"kind": "code", "ref": "KeystoneHQ/keystone3-firmware:rust/zcash_vendor/Cargo.toml", "pattern": "zcash_protocol = \\{ version = \"0\\.10", "means": "broken", "label": "Built on zcash_protocol 0.10 (no NU7)"},
+    {"kind": "code", "ref": "KeystoneHQ/keystone3-firmware:rust/zcash_vendor/Cargo.toml", "pattern": "zcash_protocol = \\{ version = \"=?0\\.1[1-9]", "means": "fixed", "label": "On zcash_protocol 0.11 or later (has NU7)"}
+   ]
+  },
+  {
+   "id": "keepkey",
+   "name": "KeepKey firmware",
+   "category": "Hardware wallet",
+   "note": "The current firmware source (7.16, merged 16 Oct) signs Ironwood and Orchard-to-Ironwood spends only under the NU6.3 branch ID 0x37A5165B, so it refuses them under NU7's 0x77190AD9. No NU7 change in the repository.",
+   "signals": [
+    {"kind": "code", "ref": "keepkey/keepkey-firmware:lib/firmware/fsm_msg_zcash.h", "pattern": "branch_id != 0x37A5165B", "means": "broken", "label": "Ironwood signing requires the NU6.3 branch ID"},
+    {"kind": "code", "ref": "keepkey/keepkey-firmware:lib/firmware/fsm_msg_zcash.h", "pattern": "(?i)0x77190AD9", "means": "fixed", "label": "NU7 branch ID present"}
+   ]
+  },
+  {
+   "id": "unstoppable",
+   "name": "Unstoppable Wallet",
+   "category": "Wallet",
+   "note": "Both apps pin Zcash SDKs from before the NU7 Mainnet crates: Android uses Zodl SDK 3.2.0 (an 8 Sep build); iOS uses a fork of Zodl Swift SDK 5.0.0 on zcash_protocol 0.10.2, which has no NU7. No NU7 issue or PR found.",
+   "signals": [
+    {"kind": "code", "ref": "horizontalsystems/unstoppable-wallet-android:gradle/libs.versions.toml", "pattern": "zcashSdk = \"3\\.2\\.0-20260908", "means": "broken", "label": "Android: Zodl SDK 3.2.0 build of 8 Sep"},
+    {"kind": "code", "ref": "horizontalsystems/unstoppable-wallet-ios:Wallet.xcworkspace/xcshareddata/swiftpm/Package.resolved", "pattern": "\"version\" : \"5\\.0\\.0-hs\\.1\"", "means": "broken", "label": "iOS: Swift SDK fork 5.0.0-hs.1"}
+   ]
+  },
+  {
+   "id": "zodl-ios",
+   "name": "Zodl iOS (Swift SDK)",
+   "category": "Wallet SDK",
+   "note": "The Swift SDK is on the NU7 pre-release crates (zcash_protocol 0.11.0-pre.0), which have no Mainnet activation height. The tracking issue is open and no fix PR was found; the Zodl iOS app builds on this SDK.",
+   "signals": [
+    {"kind": "blocker", "ref": "zodl-inc/zodl-swift-wallet-sdk#114"},
+    {"kind": "code", "ref": "zodl-inc/zodl-swift-wallet-sdk:Cargo.toml", "pattern": "zcash_protocol = \\{ version = \"=0\\.11\\.0-pre", "means": "broken", "label": "On the NU7 pre-release crates"}
+   ]
+  },
+  {
+   "id": "mit-sdks",
+   "name": "Zcash Android and Swift SDKs (original, MIT)",
+   "category": "Wallet SDK",
+   "note": "4.0.0 is the final release and support ends at NU7 (ZODL, 22 Oct). Both stay on pre-NU7 librustzcash (zcash_protocol 0.10; the Swift SDK patches in an 7 Aug revision where NU7 has no Mainnet height), so apps still built on them cannot send after activation unless they move to the ZODL SDKs or patch it themselves.",
+   "signals": [
+    {"kind": "code", "ref": "zcash/zcash-android-wallet-sdk:backend-lib/Cargo.toml", "pattern": "zcash_protocol = \"0\\.10\"", "means": "broken", "label": "Android SDK on zcash_protocol 0.10"},
+    {"kind": "code", "ref": "zcash/zcash-swift-wallet-sdk:Cargo.toml", "pattern": "zcash_protocol = \\{ git = \"https://github.com/zcash/librustzcash\", rev = \"13ce6c4e", "means": "broken", "label": "Swift SDK on a 7 Aug librustzcash revision"},
+    {"kind": "manual", "label": "ZODL: end of support for the original SDKs at NU7", "url": "https://forum.zcashcommunity.com/t/58441", "checked": "2026-10-28"}
+   ]
+  },
+  {
+   "id": "shapeshift",
+   "name": "ShapeShift",
+   "category": "Wallet",
+   "note": "Zcash sends use a fixed NU6.3 branch ID (0x37a5165b) in hdwallet-core, so they will be rejected from NU7. Cryppit filed the issue.",
+   "signals": [
+    {"kind": "blocker", "ref": "shapeshift/web#12794"},
+    {"kind": "code", "ref": "shapeshift/web:packages/hdwallet-core/src/bitcoin.ts", "pattern": "ZCASH_CONSENSUS_BRANCH_ID = 0x37a5165b", "means": "broken", "label": "Branch ID fixed to NU6.3"}
+   ]
+  },
+  {
+   "id": "zallet",
+   "name": "Zallet (zcashd wallet replacement)",
+   "category": "Wallet",
+   "note": "Still on pre-NU7 crates (zcash_protocol 0.10, patched to a 21 Aug revision). The open PR moves it to the released NU7 crates and Zebra 7.0.0. The last release, 0.1.0-beta.3 (26 Aug), predates NU7.",
+   "signals": [
+    {"kind": "blocker", "ref": "zcash/zallet#890"},
+    {"kind": "fix", "ref": "zcash/zallet#898"}
+   ]
+  },
+  {
+   "id": "ledger-live",
+   "name": "Ledger Live",
+   "category": "Wallet",
+   "note": "Ledger Live's Zcash signer moves to device-signer-kit-zcash 0.9.0, which signs Mainnet transparent transactions under the NU7 branch ID from the activation height. Users get it with the next Ledger Live release.",
+   "signals": [
+    {"kind": "code", "ref": "LedgerHQ/ledger-live:libs/live-signer-zcash/package.json", "pattern": "\"@ledgerhq/device-signer-kit-zcash\": \"\\^?0\\.(9|[1-9][0-9])\\.", "means": "fixed", "label": "Signer kit 0.9.0 or later (NU7)"}
+   ]
+  },
+  {
+   "id": "ledger-hw-app-btc",
+   "name": "Ledger hw-app-btc (JS library)",
+   "category": "Signing library",
+   "note": "The older hw-app-btc Zcash path picks the branch ID by height and stops at NU6.3, so apps that still sign ZEC through it (ShapeShift patches it) send NU6.3 transactions after activation. Ledger Live itself moved to the new signer kit.",
+   "signals": [
+    {"kind": "code", "ref": "LedgerHQ/ledger-live:libs/ledgerjs/packages/hw-app-btc/src/createTransaction.ts", "pattern": "blockHeight >= ZCASH_ACTIVATION_HEIGHTS\\.NU6_3\\) \\{", "means": "broken", "label": "Newest branch ID is NU6.3"},
+    {"kind": "code", "ref": "LedgerHQ/ledger-live:libs/ledgerjs/packages/hw-app-btc/src/createTransaction.ts", "pattern": "(?i)0x77190ad9", "means": "fixed", "label": "NU7 branch ID present"}
+   ]
+  },
+  {
+   "id": "near-omni-tx",
+   "name": "NEAR omni-transaction-rs",
+   "category": "Signing library",
+   "note": "NEAR's transaction builder for chain signatures lists Zcash branch IDs up to NU6.3 and has no NU7 entry. Callers can pass a custom ID, so whether an app breaks depends on what it passes.",
+   "signals": [
+    {"kind": "manual", "label": "ConsensusBranchId stops at Nu6_3", "url": "https://github.com/near/omni-transaction-rs/blob/HEAD/src/zcash/types/consensus_branch_id.rs", "checked": "2026-10-28"}
+   ]
+  },
+  {
+   "id": "defuse-utxo-lib",
+   "name": "Defuse Labs utxo-lib",
+   "category": "Signing library",
+   "note": "The UTXO library of NEAR Intents' builders last moved its Zcash branch ID to NU6.3 (18 Aug) and has nothing for NU7. Whether NEAR Intents' ZEC withdrawals still use it is not public.",
+   "signals": [
+    {"kind": "manual", "label": "Zcash default branch ID is NU6.3", "url": "https://github.com/chaindefuser/utxo-lib/blob/HEAD/src/bitgo/zcash/ZcashTransaction.ts", "checked": "2026-10-28"}
+   ]
+  },
+  {
+   "id": "zelcore-utxo-lib",
+   "name": "ZelCore utxo-lib",
+   "category": "Signing library",
+   "note": "ZelCore's UTXO library defaults Zcash to the NU6.3 branch ID at most, with no NU7 change or issue. Whether the ZelCore app passes its own branch ID is not visible.",
+   "signals": [
+    {"kind": "manual", "label": "Zcash default branch ID is NU6.3", "url": "https://github.com/ZelCore-io/bitgo-utxo-lib-ts/blob/HEAD/src/bitgo/zcash/ZcashTransaction.ts", "checked": "2026-10-28"}
    ]
   }
  ]
