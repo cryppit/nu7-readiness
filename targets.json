@@ -198,10 +198,10 @@
    "id": "keystone",
    "name": "Keystone 3 firmware",
    "category": "Hardware wallet",
-   "note": "Firmware 3.2.0 (23 Oct) is built on zcash_protocol 0.10.0, which has no NU7 branch ID, and its transparent signing path treats a transaction with a branch ID it does not know as unsupported. No NU7 issue or PR found.",
+   "note": "Works after NU7 as it is: NU7 changes no transaction format or signing algorithm, and the PCZTs Keystone signs carry the target branch ID themselves (str4d, 29 Oct). A PR moving the firmware to the NU7 crates is open anyway.",
    "signals": [
-    {"kind": "code", "ref": "KeystoneHQ/keystone3-firmware:rust/zcash_vendor/Cargo.toml", "pattern": "zcash_protocol = \\{ version = \"0\\.10", "means": "broken", "label": "Built on zcash_protocol 0.10 (no NU7)"},
-    {"kind": "code", "ref": "KeystoneHQ/keystone3-firmware:rust/zcash_vendor/Cargo.toml", "pattern": "zcash_protocol = \\{ version = \"=?0\\.1[1-9]", "means": "fixed", "label": "On zcash_protocol 0.11 or later (has NU7)"}
+    {"kind": "manual", "means": "fixed", "label": "str4d: existing firmware will work fine post-NU7", "url": "https://forum.zcashcommunity.com/t/57655/31", "checked": "2026-10-30"},
+    {"kind": "context", "ref": "KeystoneHQ/keystone3-firmware#2312"}
    ]
   },
   {
@@ -228,10 +228,12 @@
    "id": "zodl-ios",
    "name": "Zodl iOS (Swift SDK)",
    "category": "Wallet SDK",
-   "note": "The Swift SDK is on the NU7 pre-release crates (zcash_protocol 0.11.0-pre.0), which have no Mainnet activation height. The tracking issue is open and no fix PR was found; the Zodl iOS app builds on this SDK.",
+   "note": "Swift SDK 7.0.0 (28 Oct) moves to the final NU7 crates (zcash_protocol 0.11.0), which carry the Mainnet activation height. The Zodl iOS app builds on a private copy of the SDK, so whether the App Store build has it can't be seen publicly; Zodl says it's in the pipeline (str4d, 29 Oct).",
    "signals": [
-    {"kind": "blocker", "ref": "zodl-inc/zodl-swift-wallet-sdk#114"},
-    {"kind": "code", "ref": "zodl-inc/zodl-swift-wallet-sdk:Cargo.toml", "pattern": "zcash_protocol = \\{ version = \"=0\\.11\\.0-pre", "means": "broken", "label": "On the NU7 pre-release crates"}
+    {"kind": "release", "ref": "zodl-inc/zodl-swift-wallet-sdk@7.0.0"},
+    {"kind": "code", "ref": "zodl-inc/zodl-swift-wallet-sdk:Cargo.toml", "pattern": "zcash_protocol = \\{ version = \"=0\\.11\\.0\"", "means": "fixed", "label": "On the final NU7 crates (zcash_protocol 0.11.0)"},
+    {"kind": "context", "ref": "zodl-inc/zodl-swift-wallet-sdk#114"},
+    {"kind": "manual", "label": "str4d: the app update is in the pipeline", "url": "https://forum.zcashcommunity.com/t/57655/31", "checked": "2026-10-30"}
    ]
   },
   {

@@ -58,6 +58,11 @@ class RowStatus(unittest.TestCase):
     def test_manual_only_row_is_watch(self):
         self.assertEqual(check.row_status([self.s("manual", "noted")]), "watch")
 
+    def test_manual_report_that_means_fixed_is_fixed(self):
+        # A maintainer's word that it works with no code change (Keystone, str4d, 29 Oct)
+        self.assertEqual(check.row_status([{"kind": "manual", "state": "noted", "means": "fixed"}]), "fixed")
+        self.assertEqual(check.row_status([{"kind": "manual", "state": "noted", "means": "fixed"}, self.s("context", "open")]), "fixed")
+
     def test_an_error_never_reads_as_fixed_or_broken(self):
         self.assertEqual(check.row_status([self.s("fix", "error")]), "unknown")
         self.assertEqual(check.row_status([self.s("blocker", "error"), self.s("fix", "open")]), "in-review")

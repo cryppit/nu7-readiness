@@ -69,9 +69,11 @@ def row_status(signals: list[dict]) -> str:
     """The row's verdict from its evidence. A merged fix or a published release means fixed upstream (a release or a
     deploy may still be pending); an open fix means in review; an open blocker with no fix means broken. A failed
     lookup never counts as evidence either way. Code evidence: a pattern that `means` fixed (or broken) is found, or
-    not. Context links are shown but never decide the row."""
+    not. A manual report decides the row only when it `means` fixed (a maintainer saying it works with no change).
+    Context links are shown but never decide the row."""
     states = [(s["kind"], s["state"], s.get("means")) for s in signals if s["kind"] != "context"]
-    fixed = any(st in ("merged", "released") or (k == "code" and m == "fixed" and st == "found") for k, st, m in states)
+    fixed = any(st in ("merged", "released") or (k == "code" and m == "fixed" and st == "found")
+                or (k == "manual" and m == "fixed") for k, st, m in states)
     if fixed:
         return "fixed"
     if any(k == "fix" and st == "open" for k, st, _ in states):
@@ -106,7 +108,10 @@ def evaluate(targets: dict, fetch: Fetch, now: dt.datetime) -> dict:
         for sig in row["signals"]:
             kind = sig["kind"]
             if kind == "manual":
-                signals.append({"kind": kind, "state": "noted", "label": sig["label"], "url": sig["url"], "checked": sig["checked"]})
+                out = {"kind": kind, "state": "noted", "label": sig["label"], "url": sig["url"], "checked": sig["checked"]}
+                if "means" in sig:
+                    out["means"] = sig["means"]
+                signals.append(out)
                 continue
             api, url = api_url(kind, sig["ref"])
             out = {"kind": kind, "ref": sig["ref"], "url": url, "label": sig.get("label")}
