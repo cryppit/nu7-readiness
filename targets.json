@@ -83,9 +83,10 @@
    "id": "edge",
    "name": "Edge (react-native-zcash)",
    "category": "Wallet",
-   "note": "Rebuilds Edge's Zcash SDKs on the final NU7 crates.",
+   "note": "Replaces the end-of-life ECC SDKs with zingolib for NU7 (#79, superseding #76). Pinned to an Edge zingolib fork until zingolabs/zingolib#3112 merges; also needs edge-currency-accountbased#1135.",
    "signals": [
-    {"kind": "fix", "ref": "EdgeApp/react-native-zcash#76"}
+    {"kind": "fix", "ref": "EdgeApp/react-native-zcash#79"},
+    {"kind": "context", "ref": "EdgeApp/react-native-zcash#76"}
    ]
   },
   {
