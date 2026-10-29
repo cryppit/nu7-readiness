@@ -34,11 +34,11 @@
   },
   {
    "id": "trezor-firmware",
-   "name": "Trezor firmware: v4 path for third-party apps",
+   "name": "Trezor firmware: v4 signing cleanup",
    "category": "Hardware wallet",
-   "note": "Firmware still sends non-v5 Zcash requests to a v4 signer. Trezor says Suite is unaffected because Connect always asks for v5; third-party integrations that pass version 4 are the ones at risk.",
+   "note": "Trezor plans to stop signing v4 Zcash transactions after NU7 (they become invalid under ZIP 2003). Trezor rates it low priority with no funds at risk: Suite always asks for v5, so only third-party apps that request v4 would get a transaction the network rejects.",
    "signals": [
-    {"kind": "blocker", "ref": "trezor/trezor-firmware#8040"}
+    {"kind": "context", "ref": "trezor/trezor-firmware#8040", "label": "Drop v4 signing after NU7 (low priority)"}
    ]
   },
   {
@@ -54,8 +54,9 @@
    "id": "noir",
    "name": "Noir Wallet",
    "category": "Wallet",
-   "note": "Every Zcash send has failed on Testnet since NU7 activated there (4 Oct), reproduced again on v1.0.39 on 22 Oct. The same failure reaches Mainnet at activation unless fixed.",
+   "note": "Every Zcash send has failed on Testnet since NU7 activated there (4 Oct), reproduced on v1.0.39 on 22 Oct. A PR open since 24 Oct moves the extension to NU7-capable WASM, but its vendored crates (zcash_protocol 0.11.0-pre.1) still have no NU7 Mainnet height, so Mainnet needs a further step. The SDK repository holding the original issue was archived on 26 Oct.",
    "signals": [
+    {"kind": "fix", "ref": "NoirWallet/noir-wallet#43"},
     {"kind": "blocker", "ref": "NoirWallet/noir-wallet-sdk#23"}
    ]
   },
@@ -63,8 +64,9 @@
    "id": "zingolib",
    "name": "Zingo (zingolib)",
    "category": "Wallet",
-   "note": "Testnet wallets failed with \"invalid consensus branch id 0x77190ad9\" after Testnet NU7; the issue was closed as fixed. Whether the fix is in a Mainnet release is not checked here.",
+   "note": "Testnet wallets failed with \"invalid consensus branch id 0x77190ad9\" after Testnet NU7; that was fixed, and zingolib 8.0.0 (29 Oct) moves to the librustzcash NU7 release crates with the Mainnet height. Apps built on zingolib still have to ship their own update.",
    "signals": [
+    {"kind": "release", "ref": "zingolabs/zingolib@zingolib_v8.0.0"},
     {"kind": "blocker", "ref": "zingolabs/zingolib#2859"}
    ]
   },
@@ -72,11 +74,13 @@
    "id": "zodl-android",
    "name": "Zodl Android SDK",
    "category": "Wallet SDK",
-   "note": "SDK 5.2.2 has no NU7 Mainnet activation height. The open PR moves it to the stable librustzcash crates that carry it.",
+   "note": "The SDK's main branch moved to the final NU7 crates (zcash_protocol 0.11.0, which carries the Mainnet height) on 28 Oct, and release 6.0.0 has been prepared from it. On 30 Oct 6.0.0 was not yet on Maven Central, where the newest version was 5.2.2.",
    "signals": [
-    {"kind": "blocker", "ref": "zodl-inc/zodl-android-wallet-sdk#45"},
-    {"kind": "blocker", "ref": "zodl-inc/zodl-android-wallet-sdk#37"},
-    {"kind": "fix", "ref": "zodl-inc/zodl-android-wallet-sdk#46"}
+    {"kind": "context", "ref": "zodl-inc/zodl-android-wallet-sdk#45"},
+    {"kind": "context", "ref": "zodl-inc/zodl-android-wallet-sdk#37"},
+    {"kind": "code", "ref": "zodl-inc/zodl-android-wallet-sdk:backend-lib/Cargo.toml", "pattern": "zcash_protocol = \"=0\\.11\\.0\"", "means": "fixed", "label": "Main on the final NU7 crates (zcash_protocol 0.11.0)"},
+    {"kind": "context", "ref": "zodl-inc/zodl-android-wallet-sdk#49", "label": "SDK release 6.0.0"},
+    {"kind": "context", "ref": "zodl-inc/zodl-android-wallet-sdk#46", "label": "Earlier draft PR"}
    ]
   },
   {
@@ -113,17 +117,17 @@
    "id": "zns",
    "name": "ZNS mint",
    "category": "App",
-   "note": "Moved to the final NU7 crates (zcash_protocol 0.11, which carries the Mainnet height) in a PR merged 26 Oct; the older tracking issue was left open.",
+   "note": "Moved to the final NU7 crates (zcash_protocol 0.11, which carries the Mainnet height) in a PR merged 26 Oct; the older tracking issue was closed on 29 Oct.",
    "signals": [
     {"kind": "fix", "ref": "zcashme/zns-mint#390"},
-    {"kind": "context", "ref": "zcashme/zns-mint#378", "label": "Older tracking issue (still open)"}
+    {"kind": "context", "ref": "zcashme/zns-mint#378", "label": "Older tracking issue"}
    ]
   },
   {
    "id": "omni-zec",
    "name": "NEAR Omni Bridge: ZEC",
    "category": "Bridge",
-   "note": "The NU7 height is a contract constant, so the new contracts must be deployed on NEAR before block 3,543,405. A merged PR is not yet a deploy.",
+   "note": "The NU7 height is a contract constant. Both contracts are deployed on NEAR with it: zcash-connector.bridge.near reports version 0.9.8, and the code on zcash-client.bridge.near matches the btc-light-client v0.6.1 release byte for byte (checked 30 Oct).",
    "signals": [
     {"kind": "fix", "ref": "Near-One/btc-bridge#104"},
     {"kind": "fix", "ref": "Near-One/btc-light-client-contract#157"}
@@ -151,7 +155,7 @@
    "id": "mining-infra",
    "name": "sovright mining-infra",
    "category": "Mining",
-   "note": "Open checklist of mining-infrastructure work to finish before Mainnet activation. The final NU7 crates and the pre-activation peer floor merged on 26 Oct (#128, #129); 16 of 27 checklist items were still open on 28 Oct, including relay and pool-server qualification on NU7 blocks.",
+   "note": "Open checklist of mining-infrastructure work to finish before Mainnet activation. The final NU7 crates and the pre-activation peer floor merged on 26 Oct (#128, #129); 16 of 27 checklist items were still open on 30 Oct, including relay and pool-server qualification on NU7 blocks.",
    "signals": [
     {"kind": "blocker", "ref": "sovright/mining-infra#121"}
    ]
@@ -160,18 +164,19 @@
    "id": "bitgo",
    "name": "BitGo (wasm-utxo)",
    "category": "Custody",
-   "note": "The NU7 branch ID is merged in wasm-utxo, which BitGoJS defers to for NU6.2 and later. The BitGoJS PR was closed without merging.",
+   "note": "The NU7 branch ID and Mainnet height are in wasm-utxo (5.15.0 and later), and BitGoJS moved to that version in a PR merged 22 Oct, which also fixed old Zcash recovery defaults.",
    "signals": [
     {"kind": "fix", "ref": "BitGo/BitGoWASM#420"},
     {"kind": "code", "ref": "BitGo/BitGoWASM:packages/wasm-utxo/src/zcash/mod.rs", "pattern": "(?i)0x77190ad9", "means": "fixed", "label": "NU7 branch ID present"},
-    {"kind": "context", "ref": "BitGo/BitGoJS#9896", "label": "BitGoJS PR (closed, not merged)"}
+    {"kind": "fix", "ref": "BitGo/BitGoJS#10031"},
+    {"kind": "context", "ref": "BitGo/BitGoJS#9896", "label": "Earlier BitGoJS PR (closed, not merged)"}
    ]
   },
   {
    "id": "valar-fork",
-   "name": "librustzcash fork with an early NU7 ID",
+   "name": "Valar librustzcash fork: early NU7 ID PR",
    "category": "Signing library",
-   "note": "An early fork exposed NU7 as 0x77190AD8. The final ID is 0x77190AD9, so anything built on that pre-release carries the wrong value.",
+   "note": "A PR to Valar's librustzcash fork proposed exposing NU7 as 0x77190AD8; the final ID is 0x77190AD9. It was closed without merging on 27 Oct and the fork's main branch never carried it, so only code built straight from that PR branch would have the wrong value.",
    "signals": [
     {"kind": "context", "ref": "valargroup/librustzcash#76", "label": "Exposes NU7 as 0x77190AD8"}
    ]
@@ -208,7 +213,7 @@
    "id": "keepkey",
    "name": "KeepKey firmware",
    "category": "Hardware wallet",
-   "note": "The current firmware source (7.16, merged 16 Oct) signs Ironwood and Orchard-to-Ironwood spends only under the NU6.3 branch ID 0x37A5165B, so it refuses them under NU7's 0x77190AD9. No NU7 change in the repository.",
+   "note": "Firmware 7.16.0 (a pre-release, 28 Oct) signs Ironwood and Orchard-to-Ironwood spends only under the NU6.3 branch ID 0x37A5165B, so it refuses them under NU7's 0x77190AD9. No NU7 change in the repository.",
    "signals": [
     {"kind": "code", "ref": "keepkey/keepkey-firmware:lib/firmware/fsm_msg_zcash.h", "pattern": "branch_id != 0x37A5165B", "means": "broken", "label": "Ironwood signing requires the NU6.3 branch ID"},
     {"kind": "code", "ref": "keepkey/keepkey-firmware:lib/firmware/fsm_msg_zcash.h", "pattern": "(?i)0x77190AD9", "means": "fixed", "label": "NU7 branch ID present"}
@@ -216,12 +221,21 @@
   },
   {
    "id": "unstoppable",
-   "name": "Unstoppable Wallet",
+   "name": "Unstoppable Wallet (Android)",
    "category": "Wallet",
-   "note": "Both apps pin Zcash SDKs from before the NU7 Mainnet crates: Android uses Zodl SDK 3.2.0 (an 8 Sep build); iOS uses a fork of Zodl Swift SDK 5.0.0 on zcash_protocol 0.10.2, which has no NU7. No NU7 issue or PR found.",
+   "note": "Pins Zodl Android SDK 3.2.0 (an 8 Sep snapshot build), from before the NU7 Mainnet crates, on both its master and develop branches. No NU7 issue or PR found.",
    "signals": [
-    {"kind": "code", "ref": "horizontalsystems/unstoppable-wallet-android:gradle/libs.versions.toml", "pattern": "zcashSdk = \"3\\.2\\.0-20260908", "means": "broken", "label": "Android: Zodl SDK 3.2.0 build of 8 Sep"},
-    {"kind": "code", "ref": "horizontalsystems/unstoppable-wallet-ios:Wallet.xcworkspace/xcshareddata/swiftpm/Package.resolved", "pattern": "\"version\" : \"5\\.0\\.0-hs\\.1\"", "means": "broken", "label": "iOS: Swift SDK fork 5.0.0-hs.1"}
+    {"kind": "code", "ref": "horizontalsystems/unstoppable-wallet-android:gradle/libs.versions.toml", "pattern": "zcashSdk = \"3\\.2\\.0-20260908", "means": "broken", "label": "Zodl SDK 3.2.0 build of 8 Sep"}
+   ]
+  },
+  {
+   "id": "unstoppable-ios",
+   "name": "Unstoppable Wallet (iOS)",
+   "category": "Wallet",
+   "note": "Moved to its fork of Zodl Swift SDK 7.0.0 (7.0.0-hs.2) for NU7 in a PR merged 29 Oct, with app version 0.53.1. Users are safe once 0.53.1 or later is out.",
+   "signals": [
+    {"kind": "fix", "ref": "horizontalsystems/unstoppable-wallet-ios#7339"},
+    {"kind": "code", "ref": "horizontalsystems/unstoppable-wallet-ios:Wallet.xcworkspace/xcshareddata/swiftpm/Package.resolved", "pattern": "\"version\" : \"7\\.\\d+\\.\\d+-hs", "means": "fixed", "label": "Swift SDK fork 7.x (NU7)"}
    ]
   },
   {
@@ -271,7 +285,7 @@
    "id": "ledger-live",
    "name": "Ledger Live",
    "category": "Wallet",
-   "note": "Ledger Live's Zcash signer moves to device-signer-kit-zcash 0.9.0, which signs Mainnet transparent transactions under the NU7 branch ID from the activation height. Users get it with the next Ledger Live release.",
+   "note": "Ledger Live's Zcash signer uses device-signer-kit-zcash 0.9.0, which signs Mainnet transparent transactions under the NU7 branch ID from the activation height. It ships in Ledger Live 4.25.0 (desktop and mobile, 22 Oct).",
    "signals": [
     {"kind": "code", "ref": "LedgerHQ/ledger-live:libs/live-signer-zcash/package.json", "pattern": "\"@ledgerhq/device-signer-kit-zcash\": \"\\^?0\\.(9|[1-9][0-9])\\.", "means": "fixed", "label": "Signer kit 0.9.0 or later (NU7)"}
    ]
