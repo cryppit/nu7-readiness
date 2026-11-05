@@ -27,9 +27,31 @@
    "id": "swapkit-trezor",
    "name": "SwapKit: Trezor ZEC signing",
    "category": "Swap",
-   "note": "Moves SwapKit's Trezor Zcash signing to v5, so ZEC received in v6 transactions can be spent.",
+   "note": "Trezor signs SwapKit's Zcash sends and swaps as v5, so ZEC received in v6 transactions can be spent. Merged 3 Nov in #216, which carries #189.",
    "signals": [
-    {"kind": "fix", "ref": "swapkit/wallets#189"}
+    {"kind": "fix", "ref": "swapkit/wallets#216"},
+    {"kind": "context", "ref": "swapkit/wallets#189"}
+   ]
+  },
+  {
+   "id": "zaino",
+   "name": "Zaino (light-wallet indexer)",
+   "category": "Infrastructure",
+   "note": "Reported on 1 Nov: Zaino 0.10.1 and 0.10.2 stop at the last block before NU7 with \"invalid consensus branch id\", reproduced on a Zebra 7.0.0 regtest chain, so Mainnet deployments would stall the same way. The reporter verified that the open PR fixes it, but it isn't merged or released yet.",
+   "signals": [
+    {"kind": "blocker", "ref": "zingolabs/zaino#1731"},
+    {"kind": "fix", "ref": "zingolabs/zaino#1655"}
+   ]
+  },
+  {
+   "id": "trezor-suite",
+   "name": "Trezor Suite and Blockbook (ZEC)",
+   "category": "Wallet",
+   "note": "Blockbook's Zcash config still pins Zebra 6.2.2, and its open PR says both backends need 7.0.0 before activation. Suite's fallback branch ID is also still NU6.3, used only when neither the caller nor Blockbook gives one. Trezor's own servers may already be updated; that can't be seen publicly.",
+   "signals": [
+    {"kind": "fix", "ref": "trezor/blockbook#1873"},
+    {"kind": "fix", "ref": "trezor/trezor-suite#34308"},
+    {"kind": "context", "ref": "trezor/trezor-suite#34304"}
    ]
   },
   {
@@ -54,10 +76,11 @@
    "id": "noir",
    "name": "Noir Wallet",
    "category": "Wallet",
-   "note": "Every Zcash send has failed on Testnet since NU7 activated there (4 Oct), reproduced on v1.0.39 on 22 Oct. A PR open since 24 Oct moves the extension to NU7-capable WASM, but its vendored crates (zcash_protocol 0.11.0-pre.1) still have no NU7 Mainnet height, so Mainnet needs a further step. The SDK repository holding the original issue was archived on 26 Oct.",
+   "note": "v1.0.41 (4 Nov) packages the Zcash wallet for NU7 Mainnet at height 3,543,405. Testnet sends failed on earlier releases; a Free Society Hack team reported a Testnet send working on v1.0.41 the same day. Mainnet and Testnet are separate builds, so users need the right one at 1.0.41 or later.",
    "signals": [
-    {"kind": "fix", "ref": "NoirWallet/noir-wallet#43"},
-    {"kind": "blocker", "ref": "NoirWallet/noir-wallet-sdk#23"}
+    {"kind": "release", "ref": "NoirWallet/noir-wallet@v1.0.41"},
+    {"kind": "context", "ref": "NoirWallet/noir-wallet#53"},
+    {"kind": "context", "ref": "NoirWallet/noir-wallet-sdk#23", "label": "Original issue, repository archived"}
    ]
   },
   {
@@ -74,7 +97,7 @@
    "id": "zodl-android",
    "name": "Zodl Android SDK",
    "category": "Wallet SDK",
-   "note": "The SDK's main branch moved to the final NU7 crates (zcash_protocol 0.11.0, which carries the Mainnet height) on 28 Oct, and release 6.0.0 has been prepared from it. On 30 Oct 6.0.0 was not yet on Maven Central, where the newest version was 5.2.2.",
+   "note": "The SDK's main branch moved to the final NU7 crates (zcash_protocol 0.11.0, which carries the Mainnet height) on 28 Oct, and release 6.0.0 is on Maven Central (published 30 Oct).",
    "signals": [
     {"kind": "context", "ref": "zodl-inc/zodl-android-wallet-sdk#45"},
     {"kind": "context", "ref": "zodl-inc/zodl-android-wallet-sdk#37"},
@@ -85,12 +108,13 @@
   },
   {
    "id": "edge",
-   "name": "Edge (react-native-zcash)",
+   "name": "Edge",
    "category": "Wallet",
-   "note": "Replaces the end-of-life ECC SDKs with zingolib for NU7 (#79, superseding #76). Pinned to an Edge zingolib fork until zingolabs/zingolib#3112 merges; also needs edge-currency-accountbased#1135.",
+   "note": "Edge moved off react-native-zcash to its new zcash-native package, on the NU7 zingolib base (merged 4 Nov), and the app moved to it on 5 Nov. Users are fine once that Edge update reaches them; the release can't be confirmed from GitHub yet.",
    "signals": [
-    {"kind": "fix", "ref": "EdgeApp/react-native-zcash#79"},
-    {"kind": "context", "ref": "EdgeApp/react-native-zcash#76"}
+    {"kind": "fix", "ref": "EdgeApp/zcash-native#1"},
+    {"kind": "fix", "ref": "EdgeApp/edge-react-gui#6306"},
+    {"kind": "context", "ref": "EdgeApp/react-native-zcash#79", "label": "Earlier PR, closed in favour of zcash-native"}
    ]
   },
   {
@@ -223,9 +247,9 @@
    "id": "unstoppable",
    "name": "Unstoppable Wallet (Android)",
    "category": "Wallet",
-   "note": "Pins Zodl Android SDK 3.2.0 (an 8 Sep snapshot build), from before the NU7 Mainnet crates, on both its master and develop branches. No NU7 issue or PR found.",
+   "note": "Moved to Zodl Android SDK 6.0.0, on the final NU7 crates, on 2 Nov on both its master and develop branches. App version 0.53.1 (4 Nov) includes it, so users are fine once they are on 0.53.1 or later.",
    "signals": [
-    {"kind": "code", "ref": "horizontalsystems/unstoppable-wallet-android:gradle/libs.versions.toml", "pattern": "zcashSdk = \"3\\.2\\.0-20260908", "means": "broken", "label": "Zodl SDK 3.2.0 build of 8 Sep"}
+    {"kind": "code", "ref": "horizontalsystems/unstoppable-wallet-android:gradle/libs.versions.toml", "pattern": "zcashSdk = \"6\\.", "means": "fixed", "label": "Zodl SDK 6.x (NU7)"}
    ]
   },
   {
@@ -275,10 +299,11 @@
    "id": "zallet",
    "name": "Zallet (zcashd wallet replacement)",
    "category": "Wallet",
-   "note": "Still on pre-NU7 crates (zcash_protocol 0.10, patched to a 21 Aug revision). The open PR moves it to the released NU7 crates and Zebra 7.0.0. The last release, 0.1.0-beta.3 (26 Aug), predates NU7.",
+   "note": "Moved to the released NU7 crates and Zebra 7.0.0 in a PR merged 30 Oct, and 0.1.0-beta.4 (2 Nov) is the first release with them.",
    "signals": [
     {"kind": "blocker", "ref": "zcash/zallet#890"},
-    {"kind": "fix", "ref": "zcash/zallet#898"}
+    {"kind": "fix", "ref": "zcash/zallet#898"},
+    {"kind": "release", "ref": "zcash/wallet@v0.1.0-beta.4"}
    ]
   },
   {
