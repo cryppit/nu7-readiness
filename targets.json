@@ -5,10 +5,11 @@
    "id": "trust-wallet-core",
    "name": "Trust Wallet Core",
    "category": "Signing library",
-   "note": "Builds only v4 Zcash transactions, which NU7 made invalid. Apps that rely on it for Zcash can't send transparent ZEC until a v5 release ships. Vultisig added its own v5 code instead (#6151).",
+   "note": "Builds only v4 Zcash transactions, which NU7 made invalid. Apps that rely on it for Zcash can't send transparent ZEC until a v5 release ships. An open PR (#4934, 5 Nov) adds transparent v5 signing. Vultisig added its own v5 code instead (#6151).",
    "signals": [
     {"kind": "code", "ref": "trustwallet/wallet-core:rust/chains/tw_zcash/src/modules/transaction_builder.rs", "pattern": "TRANSACTION_VERSION_4", "means": "broken", "label": "Transaction builder still sets version 4"},
     {"kind": "blocker", "ref": "trustwallet/wallet-core#4910"},
+    {"kind": "fix", "ref": "trustwallet/wallet-core#4934"},
     {"kind": "context", "ref": "ZcashCommunityGrants/zcashcommunitygrants#511", "label": "Grant application for a Wallet Core v5 repair (under review)"}
    ]
   },
