@@ -5,7 +5,7 @@
    "id": "trust-wallet-core",
    "name": "Trust Wallet Core",
    "category": "Signing library",
-   "note": "Builds only v4 Zcash transactions, which NU7 makes invalid. Apps that embed it (Trust Wallet, Vultisig and others) cannot send transparent ZEC after activation until a v5 release ships.",
+   "note": "Builds only v4 Zcash transactions, which NU7 made invalid. Apps that rely on it for Zcash can't send transparent ZEC until a v5 release ships. Vultisig added its own v5 code instead (#6151).",
    "signals": [
     {"kind": "code", "ref": "trustwallet/wallet-core:rust/chains/tw_zcash/src/modules/transaction_builder.rs", "pattern": "TRANSACTION_VERSION_4", "means": "broken", "label": "Transaction builder still sets version 4"},
     {"kind": "blocker", "ref": "trustwallet/wallet-core#4910"},
@@ -14,12 +14,14 @@
   },
   {
    "id": "vultisig-swapkit",
-   "name": "Vultisig Android: SwapKit ZEC swaps",
+   "name": "Vultisig: SwapKit ZEC swaps",
    "category": "Swap",
-   "note": "ZEC-source swaps through SwapKit are signed as Sapling v4 with ZIP-243 digests, and v5 is rejected. The provider builds the transaction, so a fix needs SwapKit as well as the app.",
+   "note": "SwapKit now builds ZEC swaps as v5 with the NU7 branch ID (read 6 Nov on its Maya, THORChain and Flashnet routes; its NEAR route wasn't tested). Vultisig's SwapKit signers still accept only v4 (Android 1.0.124, iOS 1.50.80), so from the code these swaps stop with an error before signing and no funds move. Normal sends and THORChain or Maya swaps outside SwapKit moved to v5 in #6151, and #6115 was closed on that basis.",
    "signals": [
     {"kind": "code", "ref": "vultisig/vultisig-android:data/src/main/kotlin/com/vultisig/wallet/data/chains/helpers/SwapKitZcashSigner.kt", "pattern": "v5[\\s*]+NU5\\s+hard-rejected", "means": "broken", "label": "Signer accepts Sapling v4 only"},
-    {"kind": "blocker", "ref": "vultisig/vultisig-android#6115"},
+    {"kind": "code", "ref": "vultisig/vultisig-ios:VultisigApp/VultisigApp/Blockchain/UTXO/Signing/SwapKitZcashSigner.swift", "pattern": "guard version == saplingTxVersion", "means": "broken", "label": "iOS signer accepts Sapling v4 only"},
+    {"kind": "context", "ref": "vultisig/vultisig-android#6115", "label": "Closed 6 Nov; #6151 left the SwapKit path unchanged"},
+    {"kind": "context", "ref": "vultisig/vultisig-android#6151", "label": "v5 for sends and THORChain/Maya swaps, not SwapKit"},
     {"kind": "context", "ref": "ZcashCommunityGrants/zcashcommunitygrants#513", "label": "Grant application for v5 swap signing (under review)"}
    ]
   },
@@ -67,7 +69,7 @@
    "id": "zondax-ledger",
    "name": "Zondax Ledger app (ledger-zcash)",
    "category": "Hardware wallet",
-   "note": "No NU7 change found in the repository. Its NU6.3 branch-ID update has been open since 8 Sep.",
+   "note": "No NU7 change found in the repository. Its NU6.3 branch-ID update has been open since 8 Sep. Shielded Ledger work has moved to LedgerHQ/app-zcash and pczt-ledger, which this row doesn't track yet.",
    "signals": [
     {"kind": "context", "ref": "Zondax/ledger-zcash#143", "label": "NU6.3 branch-ID update (not NU7)"}
    ]
@@ -110,7 +112,7 @@
    "id": "edge",
    "name": "Edge",
    "category": "Wallet",
-   "note": "Edge moved off react-native-zcash to its new zcash-native package, on the NU7 zingolib base (merged 4 Nov), and the app moved to it on 5 Nov. Users are fine once that Edge update reaches them; the release can't be confirmed from GitHub yet.",
+   "note": "Edge moved off react-native-zcash to its new zcash-native package, on the NU7 zingolib base (merged 4 Nov), and the app moved to it on 5 Nov. Release tag v4.52.3 pins zcash-native 0.1.1, so users are fine once they have that version.",
    "signals": [
     {"kind": "fix", "ref": "EdgeApp/zcash-native#1"},
     {"kind": "fix", "ref": "EdgeApp/edge-react-gui#6306"},
@@ -130,7 +132,7 @@
    "id": "webzjs",
    "name": "WebZjs (MetaMask Snap)",
    "category": "Wallet",
-   "note": "Still built on ChainSafe's NU6.1 fork of librustzcash (last commit April 2026), so it has neither NU6.3 nor NU7; a user reported in June that shielding is rejected for an incorrect consensus branch ID. The maintainers said on the forum they would redeploy after NU7.",
+   "note": "Still built on ChainSafe's NU6.1 fork of librustzcash (last commit April 2026), so it has neither NU6.3 nor NU7; a user reported in June that shielding is rejected for an incorrect consensus branch ID. Mari of red·dev said on the forum it would be redeployed after NU7.",
    "signals": [
     {"kind": "blocker", "ref": "ChainSafe/WebZjs#166"},
     {"kind": "code", "ref": "ChainSafe/WebZjs:Cargo.toml", "pattern": "librustzcash-nu61", "means": "broken", "label": "Built on an NU6.1 librustzcash fork"},
@@ -247,7 +249,7 @@
    "id": "unstoppable",
    "name": "Unstoppable Wallet (Android)",
    "category": "Wallet",
-   "note": "Moved to Zodl Android SDK 6.0.0, on the final NU7 crates, on 2 Nov on both its master and develop branches. App version 0.53.1 (4 Nov) includes it, so users are fine once they are on 0.53.1 or later.",
+   "note": "Moved to Zodl Android SDK 6.0.0, on the final NU7 crates, on 2 Nov on both its master and develop branches. App version 0.53.1 (4 Nov) includes it, so users are fine once they are on 0.53.1 or later. GitHub marks 0.53.1 as a pre-release, and the Play Store version hasn't been checked.",
    "signals": [
     {"kind": "code", "ref": "horizontalsystems/unstoppable-wallet-android:gradle/libs.versions.toml", "pattern": "zcashSdk = \"6\\.", "means": "fixed", "label": "Zodl SDK 6.x (NU7)"}
    ]
@@ -256,7 +258,7 @@
    "id": "unstoppable-ios",
    "name": "Unstoppable Wallet (iOS)",
    "category": "Wallet",
-   "note": "Moved to its fork of Zodl Swift SDK 7.0.0 (7.0.0-hs.2) for NU7 in a PR merged 29 Oct, with app version 0.53.1. Users are safe once 0.53.1 or later is out.",
+   "note": "Moved to its fork of Zodl Swift SDK 7.0.0 (7.0.0-hs.2) for NU7 in a PR merged 29 Oct, with app version 0.53.1, which the App Store has listed since 2 Nov.",
    "signals": [
     {"kind": "fix", "ref": "horizontalsystems/unstoppable-wallet-ios#7339"},
     {"kind": "code", "ref": "horizontalsystems/unstoppable-wallet-ios:Wallet.xcworkspace/xcshareddata/swiftpm/Package.resolved", "pattern": "\"version\" : \"7\\.\\d+\\.\\d+-hs", "means": "fixed", "label": "Swift SDK fork 7.x (NU7)"}
@@ -266,7 +268,7 @@
    "id": "zodl-ios",
    "name": "Zodl iOS (Swift SDK)",
    "category": "Wallet SDK",
-   "note": "Swift SDK 7.0.0 (28 Oct) moves to the final NU7 crates (zcash_protocol 0.11.0), which carry the Mainnet activation height. The Zodl iOS app builds on a private copy of the SDK, so whether the App Store build has it can't be seen publicly; Zodl says it's in the pipeline (str4d, 29 Oct).",
+   "note": "Swift SDK 7.0.0 (28 Oct) moves to the final NU7 crates (zcash_protocol 0.11.0), which carry the Mainnet activation height. The Zodl iOS app builds on a private copy of the SDK, but App Store version 3.19.0 (29 Oct) lists NU7 support in its release notes.",
    "signals": [
     {"kind": "release", "ref": "zodl-inc/zodl-swift-wallet-sdk@7.0.0"},
     {"kind": "code", "ref": "zodl-inc/zodl-swift-wallet-sdk:Cargo.toml", "pattern": "zcash_protocol = \\{ version = \"=0\\.11\\.0\"", "means": "fixed", "label": "On the final NU7 crates (zcash_protocol 0.11.0)"},
@@ -278,7 +280,7 @@
    "id": "mit-sdks",
    "name": "Zcash Android and Swift SDKs (original, MIT)",
    "category": "Wallet SDK",
-   "note": "4.0.0 is the final release and support ends at NU7 (ZODL, 22 Oct). Both stay on pre-NU7 librustzcash (zcash_protocol 0.10; the Swift SDK patches in an 7 Aug revision where NU7 has no Mainnet height), so apps still built on them cannot send after activation unless they move to the ZODL SDKs or patch it themselves.",
+   "note": "4.0.0 is the final release and support ends at NU7 (ZODL, 22 Oct). Both stay on pre-NU7 librustzcash (zcash_protocol 0.10; the Swift SDK patches in an 7 Aug revision where NU7 has no Mainnet height), so apps still built on them can't send now unless they move to the ZODL SDKs or patch it themselves.",
    "signals": [
     {"kind": "code", "ref": "zcash/zcash-android-wallet-sdk:backend-lib/Cargo.toml", "pattern": "zcash_protocol = \"0\\.10\"", "means": "broken", "label": "Android SDK on zcash_protocol 0.10"},
     {"kind": "code", "ref": "zcash/zcash-swift-wallet-sdk:Cargo.toml", "pattern": "zcash_protocol = \\{ git = \"https://github.com/zcash/librustzcash\", rev = \"13ce6c4e", "means": "broken", "label": "Swift SDK on a 7 Aug librustzcash revision"},
@@ -289,7 +291,7 @@
    "id": "shapeshift",
    "name": "ShapeShift",
    "category": "Wallet",
-   "note": "Zcash sends use a fixed NU6.3 branch ID (0x37a5165b) in hdwallet-core, so they will be rejected from NU7. Cryppit filed the issue.",
+   "note": "Zcash sends use a fixed NU6.3 branch ID (0x37a5165b) in hdwallet-core, so NU7 nodes reject them. Cryppit filed the issue.",
    "signals": [
     {"kind": "blocker", "ref": "shapeshift/web#12794"},
     {"kind": "code", "ref": "shapeshift/web:packages/hdwallet-core/src/bitcoin.ts", "pattern": "ZCASH_CONSENSUS_BRANCH_ID = 0x37a5165b", "means": "broken", "label": "Branch ID fixed to NU6.3"}
@@ -319,7 +321,7 @@
    "id": "ledger-hw-app-btc",
    "name": "Ledger hw-app-btc (JS library)",
    "category": "Signing library",
-   "note": "The older hw-app-btc Zcash path picks the branch ID by height and stops at NU6.3, so apps that still sign ZEC through it (ShapeShift patches it) send NU6.3 transactions after activation. Ledger Live itself moved to the new signer kit.",
+   "note": "The older hw-app-btc Zcash path picks the branch ID by height and stops at NU6.3, so apps that still sign ZEC through it (ShapeShift patches it) send NU6.3 transactions, which NU7 nodes reject. Ledger Live itself moved to the new signer kit.",
    "signals": [
     {"kind": "code", "ref": "LedgerHQ/ledger-live:libs/ledgerjs/packages/hw-app-btc/src/createTransaction.ts", "pattern": "blockHeight >= ZCASH_ACTIVATION_HEIGHTS\\.NU6_3\\) \\{", "means": "broken", "label": "Newest branch ID is NU6.3"},
     {"kind": "code", "ref": "LedgerHQ/ledger-live:libs/ledgerjs/packages/hw-app-btc/src/createTransaction.ts", "pattern": "(?i)0x77190ad9", "means": "fixed", "label": "NU7 branch ID present"}

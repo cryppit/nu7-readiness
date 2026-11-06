@@ -70,11 +70,11 @@
 <main>
   <p class="kicker">Zcash · NU7 · read-only</p>
   <h1>Who is ready for NU7?</h1>
-  <p class="lead">At NU7, every version 4 Zcash transaction becomes invalid and signers need the new consensus branch ID
+  <p class="lead">NU7 activated on Mainnet on 6 November 2026. Every version 4 Zcash transaction is now invalid and signers need the new consensus branch ID
     <span class="mono">0x77190AD9</span>. This board tracks wallets, libraries, bridges and swaps from public evidence:
     GitHub issues, pull requests, releases and source code, re-checked several times a day; the time of the last check is shown.</p>
 
-  <section class="panel" aria-label="Activation countdown">
+  <section class="panel" aria-label="Activation status">
     <div class="clock">
       <div><span>Activation height</span><strong class="mono">3,543,405</strong></div>
       <div><span>Current height</span><strong id="tip">…</strong></div>
@@ -103,12 +103,12 @@
     <li><b>Blocks every 25 seconds</b> instead of 75 (ZIP 218). The same number of confirmations now takes a third of the time.</li>
     <li><b>Sprout funds become unspendable</b>, because Sprout can only be spent in a v4 transaction.</li>
   </ol>
-  <p class="muted">Source: <a href="https://zips.z.cash/zip-0259">ZIP 259</a>. Zebra 7.0.0 is the node release that activates NU7; Zebra 6.4.x stops itself around 2 November.</p>
+  <p class="muted">Source: <a href="https://zips.z.cash/zip-0259">ZIP 259</a>. Zebra 7.0.0 is the node release that activates NU7; Zebra 6.4.x stopped itself around 2 November.</p>
   <p>Did your ZEC withdrawal land shielded? <a href="https://cryppit.github.io/shield-receipt/">Check it with Shield Receipt</a>: paste the txid and the address you gave, and see whether it was paid to the transparent part or landed shielded, and in which pool. Keyless and read-only, also by Cryppit.</p>
 
   <footer>
     <p id="checked">Last checked: …</p>
-    <p>Read-only: this page and its checker only read public data (GitHub and the Blockchair explorer). The countdown assumes 75-second blocks until activation. Rows and the rules behind each status are in <a href="https://github.com/cryppit/nu7-readiness">github.com/cryppit/nu7-readiness</a>; corrections are welcome as issues there.</p>
+    <p>Read-only: this page and its checker only read public data (GitHub and the Blockchair explorer). Rows and the rules behind each status are in <a href="https://github.com/cryppit/nu7-readiness">github.com/cryppit/nu7-readiness</a>; corrections are welcome as issues there.</p>
     <p>Run by <a href="https://github.com/cryppit">Cryppit</a>. Cryppit filed some of the linked items (vultisig-android #6115 and grant application ZCG #513) and has a grant application in review for the Vultisig/SwapKit swap path.</p>
   </footer>
 </main>
@@ -177,7 +177,7 @@ function filters() {
 function header() {
   const c = data.chain || {};
   document.getElementById("tip").textContent = fmt(c.tip);
-  document.getElementById("left").textContent = c.tip == null ? "unavailable" : fmt(c.blocks_left);
+  document.getElementById("left").textContent = c.active ? "0" : c.tip == null ? "unavailable" : fmt(c.blocks_left);
   document.getElementById("eta").textContent = c.active ? "activated" : c.eta_utc ? `~${c.eta_utc.slice(0, 16).replace("T", " ")}` : "unavailable";
   const banners = document.getElementById("banners");
   if (c.active) banners.append(el("p", { class: "banner active" }, "NU7 is active on Mainnet. Version 4 transactions are now rejected."));

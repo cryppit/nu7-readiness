@@ -93,17 +93,20 @@ class RowStatus(unittest.TestCase):
         self.assertEqual(check.row_status([self.s("context", "merged"), self.s("blocker", "open")]), "broken")
 
 
-class Countdown(unittest.TestCase):
-    def test_before_activation(self):
-        c = check.countdown(3_528_654, NOW)
-        self.assertFalse(c["active"])
-        self.assertEqual(c["blocks_left"], 14_751)
-        # 14,751 blocks at 75 s = 1,106,325 s = 12 d 19 h 18 m 45 s
-        self.assertEqual(c["eta_utc"], "2026-11-06T01:18:45Z")
+class ChainState(unittest.TestCase):
+    def test_a_lagging_explorer_cannot_undo_activation(self):
+        c = check.chain_state(3_543_404)
+        self.assertTrue(c["active"])
+        self.assertIsNone(c["tip"])
+        self.assertEqual(c["blocks_left"], 0)
 
     def test_at_and_after_activation(self):
-        self.assertTrue(check.countdown(3_543_405, NOW)["active"])
-        self.assertEqual(check.countdown(3_543_500, NOW)["blocks_left"], 0)
+        self.assertEqual(check.chain_state(3_543_405)["tip"], 3_543_405)
+        self.assertEqual(check.chain_state(3_543_500)["tip"], 3_543_500)
+        self.assertTrue(check.chain_state(3_543_500)["active"])
+
+    def test_no_reading_is_still_active(self):
+        self.assertTrue(check.chain_state(None)["active"])
 
 
 class Evaluate(unittest.TestCase):
@@ -125,7 +128,7 @@ class Evaluate(unittest.TestCase):
             "https://api.github.com/repos/o/a/issues/1": issue("open"),
             "https://api.github.com/repos/o/a/pulls/2": pr("open"),
             "https://api.github.com/repos/o/b/releases/tags/v7.0.0": {"tag_name": "v7.0.0", "draft": False, "published_at": "2026-10-22T00:00:00Z"},
-            "https://api.blockchair.com/zcash/stats": {"data": {"best_block_height": 3_528_654}},
+            "https://api.blockchair.com/zcash/stats": {"data": {"best_block_height": 3_543_500}},
             "https://raw.githubusercontent.com/o/e/HEAD/src/tx.rs": "version: TRANSACTION_VERSION_4 | OVERWINTERED_FLAG,",
             "https://api.github.com/repos/o/e/issues/5": issue("open"),
         }
@@ -147,7 +150,7 @@ class Evaluate(unittest.TestCase):
         self.assertEqual(rows["e"]["signals"][0]["state"], "found")
         self.assertEqual(rows["e"]["signals"][0]["url"], "https://github.com/o/e/blob/HEAD/src/tx.rs")
         self.assertEqual(rows["e"]["signals"][1]["url"], "https://github.com/o/e/issues/5")
-        self.assertEqual(out["chain"]["blocks_left"], 14_751)
+        self.assertEqual(out["chain"]["tip"], 3_543_500)
         self.assertEqual(out["checked_at"], "2026-10-24T06:00:00Z")
         self.assertEqual(out["counts"], {"fixed": 1, "in-review": 1, "broken": 1, "watch": 1, "unknown": 1})
 

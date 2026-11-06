@@ -2,7 +2,7 @@
 
 Which Zcash wallets, libraries, bridges and swaps are ready for NU7, from public evidence only.
 
-NU7 activates on Mainnet at block **3,543,405** (around 5–6 November 2026, [ZIP 259](https://zips.z.cash/zip-0259)). From
+NU7 activated on Mainnet at block **3,543,405** on 6 November 2026 ([ZIP 259](https://zips.z.cash/zip-0259)). From
 that block every version 4 transaction is invalid, and signers need the new consensus branch ID `0x77190AD9`. This board
 re-checks each project several times a day and shows what the evidence says, with a link for every claim.
 

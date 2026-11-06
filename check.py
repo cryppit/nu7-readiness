@@ -18,7 +18,6 @@ from typing import Any, Callable
 
 NU7_HEIGHT = 3_543_405  # ZIP 259, Mainnet
 NU7_BRANCH_ID = "0x77190AD9"
-PRE_NU7_BLOCK_SECONDS = 75
 CHAIN_STATS = "https://api.blockchair.com/zcash/stats"  # keyless; its terms allow non-commercial projects
 UA = "cryppit-nu7-readiness/1 (read-only; github.com/cryppit/nu7-readiness)"
 STATUSES = ("fixed", "in-review", "broken", "watch", "unknown")
@@ -90,11 +89,11 @@ def row_status(signals: list[dict]) -> str:
     return "unknown"
 
 
-def countdown(tip: int, now: dt.datetime) -> dict:
-    left = max(0, NU7_HEIGHT - tip)
-    eta = now + dt.timedelta(seconds=left * PRE_NU7_BLOCK_SECONDS)
-    return {"tip": tip, "height": NU7_HEIGHT, "blocks_left": left, "active": tip >= NU7_HEIGHT,
-            "eta_utc": eta.strftime("%Y-%m-%dT%H:%M:%SZ")}
+def chain_state(tip: int | None) -> dict:
+    """NU7 activated on 6 Nov 2026 and can't un-activate. Blockchair's stats sometimes answer from a snapshot stuck
+    below the activation height, so a reading under it counts as no reading."""
+    return {"tip": tip if tip is not None and tip >= NU7_HEIGHT else None, "height": NU7_HEIGHT, "blocks_left": 0,
+            "active": True}
 
 
 def iso(t: dt.datetime) -> str:
@@ -129,9 +128,9 @@ def evaluate(targets: dict, fetch: Fetch, now: dt.datetime) -> dict:
             signals.append(out)
         rows.append({**{k: row[k] for k in ("id", "name", "category", "note")}, "status": row_status(signals), "signals": signals})
     try:
-        chain = countdown(int(fetch(CHAIN_STATS)["data"]["best_block_height"]), now)
+        chain = chain_state(int(fetch(CHAIN_STATS)["data"]["best_block_height"]))
     except Exception as e:  # noqa: BLE001
-        chain = {"tip": None, "height": NU7_HEIGHT, "error": str(e)[:160]}
+        chain = {**chain_state(None), "error": str(e)[:160]}
     counts = {s: sum(1 for r in rows if r["status"] == s) for s in STATUSES}
     return {"checked_at": iso(now), "branch_id": NU7_BRANCH_ID, "chain": chain, "counts": counts, "rows": rows}
 
