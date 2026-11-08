@@ -5,12 +5,13 @@
    "id": "trust-wallet-core",
    "name": "Trust Wallet Core",
    "category": "Signing library",
-   "note": "Builds only v4 Zcash transactions, which NU7 made invalid. Apps that rely on it for Zcash can't send transparent ZEC until a v5 release ships. An open PR (#4934, 5 Nov) adds transparent v5 signing. Vultisig added its own v5 code instead (#6151).",
+   "note": "Fixed in release 4.9.1 (6 Nov, PR #4934): Wallet Core now builds v5 Zcash transactions by default. The app still supplies the branch ID, so apps must update to 4.9.1 or later and pass NU7's 0x77190AD9. Until they do, sends built by older versions are v4, which NU7 rejects. Vultisig added its own v5 code instead (#6151).",
    "signals": [
-    {"kind": "code", "ref": "trustwallet/wallet-core:rust/chains/tw_zcash/src/modules/transaction_builder.rs", "pattern": "TRANSACTION_VERSION_4", "means": "broken", "label": "Transaction builder still sets version 4"},
+    {"kind": "code", "ref": "trustwallet/wallet-core:rust/chains/tw_zcash/src/modules/signing_request.rs", "pattern": "ZcashTransactionVersion::V5 \\| ZcashTransactionVersion::UseDefault", "means": "fixed", "label": "v5 is the default transaction version"},
+    {"kind": "release", "ref": "trustwallet/wallet-core@4.9.1"},
     {"kind": "blocker", "ref": "trustwallet/wallet-core#4910"},
     {"kind": "fix", "ref": "trustwallet/wallet-core#4934"},
-    {"kind": "context", "ref": "ZcashCommunityGrants/zcashcommunitygrants#511", "label": "Grant application for a Wallet Core v5 repair (under review)"}
+    {"kind": "context", "ref": "ZcashCommunityGrants/zcashcommunitygrants#511", "label": "Grant application for a Wallet Core v5 repair (still open, now fixed upstream)"}
    ]
   },
   {
