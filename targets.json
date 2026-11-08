@@ -133,10 +133,13 @@
    "id": "webzjs",
    "name": "WebZjs (MetaMask Snap)",
    "category": "Wallet",
-   "note": "Still built on ChainSafe's NU6.1 fork of librustzcash (last commit April 2026), so it has neither NU6.3 nor NU7; a user reported in June that shielding is rejected for an incorrect consensus branch ID. Mari of red·dev said on the forum it would be redeployed after NU7.",
+   "note": "The Snap is now maintained by red·dev in red-dev-inc/WebZjs (ChainSafe's repository hasn't changed since April). Its main branch is on the NU6.3 crates (zcash_protocol 0.10), not NU7. The NU7 port is open as #21, next to #27 (NU7 portable keys) and zcash_client_memory #18 (the Ironwood pool). The Snap published on npm (1.0.2, 11 Sep) predates both upgrades, and a user reported in June that shielding is rejected for an incorrect consensus branch ID. Mari of red·dev said on the forum it would be redeployed after NU7.",
    "signals": [
-    {"kind": "blocker", "ref": "ChainSafe/WebZjs#166"},
-    {"kind": "code", "ref": "ChainSafe/WebZjs:Cargo.toml", "pattern": "librustzcash-nu61", "means": "broken", "label": "Built on an NU6.1 librustzcash fork"},
+    {"kind": "fix", "ref": "red-dev-inc/WebZjs#21"},
+    {"kind": "code", "ref": "red-dev-inc/WebZjs:Cargo.toml", "pattern": "zcash_protocol = \\{ version = \"0\\.10\\.", "means": "broken", "label": "Main is on the NU6.3 crates (zcash_protocol 0.10)"},
+    {"kind": "context", "ref": "red-dev-inc/WebZjs#27", "label": "Open: NU7 portable keys"},
+    {"kind": "context", "ref": "red-dev-inc/zcash_client_memory#18", "label": "Open: track the Ironwood (NU6.3) pool"},
+    {"kind": "context", "ref": "ChainSafe/WebZjs#166", "label": "User report: shielding rejected for an incorrect consensus branch ID"},
     {"kind": "manual", "label": "Forum report and maintainer reply", "url": "https://forum.zcashcommunity.com/t/57655/20", "checked": "2026-10-24"}
    ]
   },
