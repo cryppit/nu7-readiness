@@ -23,7 +23,7 @@
     {"kind": "code", "ref": "vultisig/vultisig-ios:VultisigApp/VultisigApp/Blockchain/UTXO/Signing/SwapKitZcashSigner.swift", "pattern": "guard version == saplingTxVersion", "means": "broken", "label": "iOS signer accepts Sapling v4 only"},
     {"kind": "context", "ref": "vultisig/vultisig-android#6115", "label": "Closed 6 Nov; #6151 left the SwapKit path unchanged"},
     {"kind": "context", "ref": "vultisig/vultisig-android#6151", "label": "v5 for sends and THORChain/Maya swaps, not SwapKit"},
-    {"kind": "context", "ref": "ZcashCommunityGrants/zcashcommunitygrants#513", "label": "Grant application for v5 swap signing (under review)"}
+    {"kind": "context", "ref": "ZcashCommunityGrants/zcashcommunitygrants#513", "label": "Cryppit grant request for v5 swap signing (withdrawn 8 Nov)"}
    ]
   },
   {
