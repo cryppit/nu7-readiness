@@ -292,9 +292,11 @@
    "id": "shapeshift",
    "name": "ShapeShift",
    "category": "Wallet",
-   "note": "Zcash sends use a fixed NU6.3 branch ID (0x37a5165b) in hdwallet-core, so NU7 nodes reject them. Cryppit filed the issue.",
+   "note": "Fixed in #12825 (merged 6 Nov): Zcash sends had used a fixed NU6.3 branch ID (0x37a5165b), which NU7 nodes reject. Cryppit filed the issue. Still open: #12831, without which coins received in a v6 transaction (ZEC paid out by NEAR Intents, for example) can't be spent from ShapeShift's native or Ledger signer.",
    "signals": [
     {"kind": "blocker", "ref": "shapeshift/web#12794"},
+    {"kind": "fix", "ref": "shapeshift/web#12825"},
+    {"kind": "context", "ref": "shapeshift/web#12831", "label": "Open: spend coins from v6 transactions on native and Ledger"},
     {"kind": "code", "ref": "shapeshift/web:packages/hdwallet-core/src/bitcoin.ts", "pattern": "ZCASH_CONSENSUS_BRANCH_ID = 0x37a5165b", "means": "broken", "label": "Branch ID fixed to NU6.3"}
    ]
   },
