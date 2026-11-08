@@ -301,6 +301,17 @@
    ]
   },
   {
+   "id": "gem-wallet",
+   "name": "Gem Wallet",
+   "category": "Wallet",
+   "note": "Self-custodial mobile wallet (iOS and Android) with transparent ZEC only, no shielded sends. It builds v5 transactions and takes the consensus branch ID from its own Zebra node, so it moved to NU7's 0x77190AD9 with no code change. A transparent send mined in block 3,543,437, 32 blocks after activation, is a v5 transaction signed under 0x77190AD9 (read from the chain on 8 Nov).",
+   "signals": [
+    {"kind": "code", "ref": "gemwalletcom/wallet:core/crates/gem_bitcoin/src/provider/preload_mapper.rs", "pattern": "consensus\\.ok_or\\(\"Branch ID not found\"\\)\\?\\.chaintip", "means": "fixed", "label": "Branch ID read from the node's chain tip"},
+    {"kind": "code", "ref": "gemwalletcom/wallet:core/crates/gem_bitcoin/src/signer/zcash.rs", "pattern": "OVERWINTERED_VERSION_5: u32 = 0x8000_0005", "means": "fixed", "label": "Builds v5 transparent transactions"},
+    {"kind": "manual", "label": "Mainnet v5 send under 0x77190AD9 (block 3,543,437)", "url": "https://blockchair.com/zcash/transaction/91b580368de6a182f7d61b54aec7ea92d61137bb9cd714609745bdcfad6b625f", "checked": "2026-11-08", "means": "fixed"}
+   ]
+  },
+  {
    "id": "zallet",
    "name": "Zallet (zcashd wallet replacement)",
    "category": "Wallet",
