@@ -315,6 +315,17 @@
    ]
   },
   {
+   "id": "konclave",
+   "name": "Konclave (FROST group vault)",
+   "category": "Wallet",
+   "note": "A group vault for Zcash: members hold FROST shares on their own devices and sign PCZTs that a hosted coordinator builds. Its signing code is on the stable NU7 crates (zcash_protocol 0.11.0) and its upgrade table carries NU7 (0x77190AD9 from block 3,543,405). A real NU7 testnet transaction passes the device's checks in a test. No mainnet NU7 payment checked yet.",
+   "signals": [
+    {"kind": "code", "ref": "deegalabs/konclave:konclave-seal/src/epochs.rs", "pattern": "NU7: u32 = 0x7719_0ad9", "means": "fixed", "label": "Upgrade table carries the NU7 branch ID"},
+    {"kind": "code", "ref": "deegalabs/konclave:Cargo.lock", "pattern": "name = \"zcash_protocol\"\\nversion = \"0\\.11\\.", "means": "fixed", "label": "Built on zcash_protocol 0.11 (NU7)"},
+    {"kind": "code", "ref": "deegalabs/konclave:konclave-wasm/tests/nu7_real_vector.rs", "pattern": "activation_height: 4_465_026", "means": "fixed", "label": "A real NU7 testnet transaction through the device's checks"}
+   ]
+  },
+  {
    "id": "zallet",
    "name": "Zallet (zcashd wallet replacement)",
    "category": "Wallet",
