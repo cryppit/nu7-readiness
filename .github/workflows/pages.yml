@@ -1,4 +1,4 @@
-# Every hour (and on each push to main): run the tests, re-check every row, publish the page with the fresh data.
+# Every hour (and on each push to main): run the tests (Python and the page logic), re-check every row, publish the page with the fresh data.
 name: Check and publish
 
 on:
@@ -26,10 +26,11 @@ jobs:
         with:
           python-version: "3.12"
       - run: python3 -m unittest -v test_check
+      - run: node --test nu7.test.js
       - run: python3 check.py --out _site/data/status.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: cp -r index.html icons _site/ && touch _site/.nojekyll
+      - run: cp -r index.html nu7.js icons _site/ && touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

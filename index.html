@@ -64,6 +64,29 @@
   ol.facts li { margin-bottom: 6px; }
   footer { margin-top: 48px; color: var(--mute); font-size: 14px; border-top: 1px solid var(--line); padding-top: 20px; }
   .error { color: var(--red); }
+  .tools { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 16px; margin-top: 24px; }
+  .tool h2 { margin: 0 0 12px; }
+  .tool label { display: block; font: 600 12px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--mute); margin: 0 0 8px; }
+  .tool select, .tool textarea { width: 100%; background: var(--deep); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font: 15px system-ui, sans-serif; min-height: 44px; }
+  .tool textarea { font: 14px/1.45 var(--mono); resize: vertical; }
+  .tool button { margin-top: 10px; background: transparent; color: var(--lime); border: 1px solid var(--lime); border-radius: 999px; padding: 8px 16px; font: 600 14px system-ui, sans-serif; min-height: 40px; cursor: pointer; }
+  .answer { margin-top: 14px; border-left: 3px solid var(--line); padding-left: 12px; overflow-wrap: anywhere; }
+  .answer:empty { display: none; }
+  .answer p { margin: 0 0 8px; }
+  .verdict { font: 700 20px var(--mono); }
+  .a-yes { border-color: var(--lime); } .a-yes .verdict { color: var(--lime); }
+  .a-not-yet, .a-no { border-color: var(--red); } .a-not-yet .verdict, .a-no .verdict { color: var(--red); }
+  .a-unclear, .a-decoded { border-color: var(--amber); } .a-unclear .verdict, .a-decoded .verdict { color: var(--amber); }
+  .a-unknown .verdict { color: var(--mute); }
+  .answer .verdict + p, .a-decoded .verdict { font-weight: 600; }
+  .hint { color: var(--mute); font-size: 13px; margin: 12px 0 0; }
+  .deadlines { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+  .deadlines li { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; }
+  .deadlines h3 { font-size: 17px; margin: 0; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: baseline; }
+  .deadlines p { margin: 8px 0 0; }
+  .deadlines .links { font-size: 14px; color: var(--mute); }
+  .s-upcoming { color: var(--amber); border-color: var(--amber); }
+  .s-proposed, .s-passed { color: var(--mute); border-color: var(--mute); }
 </style>
 </head>
 <body>
@@ -84,6 +107,28 @@
     <div id="banners"></div>
   </section>
 
+  <div class="tools">
+    <section class="panel tool" aria-labelledby="send-title">
+      <h2 id="send-title">Can my wallet send after NU7?</h2>
+      <label for="wallet">Your wallet or app</label>
+      <select id="wallet" disabled><option value="">Loading the latest check…</option></select>
+      <div id="answer" class="answer" aria-live="polite"></div>
+      <p class="hint">Answered from this board's latest check, in your browser. Your choice isn't sent anywhere.</p>
+    </section>
+    <section class="panel tool" aria-labelledby="decode-title">
+      <h2 id="decode-title">What does my wallet's error mean?</h2>
+      <label for="err">Paste the error your wallet or node showed</label>
+      <textarea id="err" rows="3" spellcheck="false" autocomplete="off" placeholder="transaction version 4 not supported by the network upgrade Nu7"></textarea>
+      <button type="button" id="explain">Explain</button>
+      <div id="decoded" class="answer" aria-live="polite"></div>
+      <p class="hint">Decoded in your browser; the text is never sent anywhere. Never paste a recovery phrase or a private key into any page.</p>
+    </section>
+  </div>
+
+  <h2>Upcoming deadlines</h2>
+  <ul class="deadlines" id="deadlines"></ul>
+
+  <h2>The board</h2>
   <div class="filters" role="group" aria-label="Filter by status" id="filters"></div>
   <div class="rows" id="rows"><p class="muted">Loading the latest check…</p></div>
 
@@ -112,6 +157,7 @@
     <p>Run by <a href="https://github.com/cryppit">Cryppit</a>. Cryppit filed some of the linked items: shapeshift/web #12794 and vultisig-android #6115. Its grant request for the Vultisig/SwapKit swap path (ZCG #513) was withdrawn on 8 Nov, because Vultisig is doing that work itself.</p>
   </footer>
 </main>
+<script src="nu7.js"></script>
 <script>
 "use strict";
 const STALE_MS = 8 * 60 * 60 * 1000;
@@ -187,11 +233,55 @@ function header() {
   document.getElementById("checked").textContent = `Last checked: ${data.checked_at.replace("T", " ").replace("Z", " UTC")}`;
 }
 
+// Every answer below is built with text nodes (el), never innerHTML: pasted text and row data stay text.
+function answerBox(box, cls, title, lines, link) {
+  box.className = `answer ${cls}`;
+  box.replaceChildren(el("p", { class: "verdict" }, title), ...lines.map((l) => el("p", {}, l)));
+  if (link) box.append(link);
+}
+
+function sendCheck() {
+  const select = document.getElementById("wallet");
+  const choices = NU7.pickerRows(data.rows);
+  select.replaceChildren(el("option", { value: "" }, "Choose…"), ...choices.map((c) => el("option", { value: c.id }, c.label)));
+  select.disabled = false;
+  select.addEventListener("change", () => {
+    const box = document.getElementById("answer");
+    const row = data.rows.find((r) => r.id === select.value);
+    if (!row) { box.replaceChildren(); return; }
+    const a = NU7.sendAnswer(row, { stale: !(Date.now() - Date.parse(data.checked_at) < STALE_MS) });
+    const link = el("p", {}, el("a", { href: `#${row.id}` }, "See the evidence on the board"));
+    link.firstChild.addEventListener("click", () => { filter = "all"; render(); });
+    answerBox(box, `a-${a.verdict}`, a.headline, [a.summary, ...a.lines], link);
+  });
+}
+
+function decode() {
+  const box = document.getElementById("decoded");
+  const d = NU7.decodeError(document.getElementById("err").value);
+  if (!d) { box.replaceChildren(); return; }
+  const link = d.source ? el("p", { class: "hint" }, "Source: ", el("a", { href: d.source, rel: "noopener" }, d.source.replace("https://github.com/", ""))) : null;
+  answerBox(box, d.id === "unknown" ? "a-unknown" : "a-decoded", d.title, d.lines, link);
+}
+document.getElementById("explain").addEventListener("click", decode);
+document.getElementById("err").addEventListener("paste", () => setTimeout(decode, 0));
+
+function deadlinesList(chain, checkedAt) {
+  const STATUS = { upcoming: "Upcoming", proposed: "Proposed", passed: "Passed" };
+  document.getElementById("deadlines").replaceChildren(...NU7.deadlines(chain, checkedAt).map((d) => {
+    const links = el("p", { class: "links" });
+    d.links.forEach((l, i) => { if (i) links.append(" · "); links.append(el("a", { href: l.href, rel: "noopener" }, l.text)); });
+    return el("li", {}, el("h3", {}, d.title, el("span", { class: `pill s-${d.status}` }, STATUS[d.status])), ...d.lines.map((t) => el("p", {}, t)), links);
+  }));
+}
+deadlinesList(null, null);
+
 fetch("data/status.json", { cache: "no-store" })
   .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
-  .then((d) => { data = d; header(); filters(); render(); })
+  .then((d) => { data = d; header(); filters(); render(); sendCheck(); deadlinesList(d.chain, d.checked_at); })
   .catch((e) => {
     document.getElementById("rows").replaceChildren(el("p", { class: "error" }, `The latest check could not be loaded (${e.message}).`));
+    document.getElementById("wallet").replaceChildren(el("option", { value: "" }, "Unavailable: the latest check could not be loaded"));
   });
 </script>
 </body>

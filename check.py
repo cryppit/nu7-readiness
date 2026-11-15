@@ -21,6 +21,9 @@ NU7_BRANCH_ID = "0x77190AD9"
 CHAIN_STATS = "https://api.blockchair.com/zcash/stats"  # keyless; its terms allow non-commercial projects
 UA = "cryppit-nu7-readiness/1 (read-only; github.com/cryppit/nu7-readiness)"
 STATUSES = ("fixed", "in-review", "broken", "watch", "unknown")
+# The optional `user` block on a row feeds the page's "Can my wallet send after NU7?" answer: a picker label, the
+# version to have, a caveat, a pending release (dated by `checked`) and advice for while it can't send.
+USER_KEYS = ("label", "update", "caveat", "pending", "advice", "checked")
 
 Fetch = Callable[[str], Any]
 
@@ -89,6 +92,18 @@ def row_status(signals: list[dict]) -> str:
     return "unknown"
 
 
+def user_problems(user: dict) -> list[str]:
+    """What is wrong with a row's `user` block (an empty list when nothing is)."""
+    problems = [f"unknown key {k!r}" for k in user if k not in USER_KEYS]
+    problems += [f"{k!r} must be a non-empty string" for k in USER_KEYS if k in user
+                 and not (isinstance(user[k], str) and user[k].strip())]
+    if "label" not in user:
+        problems.append("a label is required")
+    if "pending" in user and "checked" not in user:
+        problems.append("a pending release needs the date it was checked")
+    return problems
+
+
 def chain_state(tip: int | None) -> dict:
     """NU7 activated on 6 Nov 2026 and can't un-activate. Blockchair's stats sometimes answer from a snapshot stuck
     below the activation height, so a reading under it counts as no reading."""
@@ -126,7 +141,10 @@ def evaluate(targets: dict, fetch: Fetch, now: dt.datetime) -> dict:
                 out["state"] = "error"
                 out["error"] = re.sub(r"\s+", " ", str(e))[:160]
             signals.append(out)
-        rows.append({**{k: row[k] for k in ("id", "name", "category", "note")}, "status": row_status(signals), "signals": signals})
+        out_row = {**{k: row[k] for k in ("id", "name", "category", "note")}, "status": row_status(signals), "signals": signals}
+        if "user" in row:
+            out_row["user"] = row["user"]
+        rows.append(out_row)
     try:
         chain = chain_state(int(fetch(CHAIN_STATS)["data"]["best_block_height"]))
     except Exception as e:  # noqa: BLE001
@@ -142,6 +160,9 @@ def main(argv: list[str]) -> int:
     targets_path, out_path = arg("--targets", "targets.json"), arg("--out", "data/status.json")
     with open(targets_path) as f:
         targets = json.load(f)
+    for row in targets["rows"]:
+        for problem in user_problems(row.get("user", {"label": "-"})):
+            print(f"{row['id']}: user block: {problem}", file=sys.stderr)
     result = evaluate(targets, http_json, dt.datetime.now(dt.timezone.utc))
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
     with open(out_path, "w") as f:

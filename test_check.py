@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import json
 import unittest
 
 import check
@@ -161,6 +162,42 @@ class Evaluate(unittest.TestCase):
         out = check.evaluate({"rows": []}, failing, NOW)
         self.assertIsNone(out["chain"]["tip"])
         self.assertIn("error", out["chain"])
+
+
+class SendCheckFields(unittest.TestCase):
+    """The optional `user` block on a row feeds the page's "Can my wallet send after NU7?" answer."""
+
+    def test_evaluate_passes_the_user_block_through(self):
+        user = {"label": "Wallet A", "update": "version 2.0 or later"}
+        targets = {"rows": [
+            {"id": "a", "name": "A", "category": "Wallet", "note": "n", "user": user,
+             "signals": [{"kind": "manual", "label": "r", "url": "https://example.org", "checked": "2026-11-16"}]},
+            {"id": "b", "name": "B", "category": "Library", "note": "n",
+             "signals": [{"kind": "manual", "label": "r", "url": "https://example.org", "checked": "2026-11-16"}]},
+        ]}
+        out = check.evaluate(targets, lambda url: {"data": {"best_block_height": 3_600_000}}, NOW)
+        rows = {r["id"]: r for r in out["rows"]}
+        self.assertEqual(rows["a"]["user"], user)
+        self.assertNotIn("user", rows["b"])
+
+    def test_user_problems(self):
+        self.assertEqual(check.user_problems({"label": "A", "update": "2.0", "caveat": "c", "advice": "a"}), [])
+        self.assertEqual(check.user_problems({"label": "A", "pending": "release due", "checked": "2026-11-16"}), [])
+        self.assertIn("label", " ".join(check.user_problems({"update": "2.0"})))
+        self.assertIn("unknown key", " ".join(check.user_problems({"label": "A", "verdict": "yes"})))
+        self.assertIn("string", " ".join(check.user_problems({"label": "A", "update": 2})))
+        # A pending release goes stale, so it must say when it was checked.
+        self.assertIn("checked", " ".join(check.user_problems({"label": "A", "pending": "release due"})))
+
+    def test_every_user_block_in_targets_json_is_well_formed(self):
+        with open("targets.json") as f:
+            rows = json.load(f)["rows"]
+        with_user = [r for r in rows if "user" in r]
+        self.assertGreater(len(with_user), 10)
+        for r in with_user:
+            self.assertEqual(check.user_problems(r["user"]), [], r["id"])
+        labels = [r["user"]["label"] for r in with_user]
+        self.assertEqual(len(labels), len(set(labels)), "labels must be unique in the picker")
 
 
 if __name__ == "__main__":
