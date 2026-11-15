@@ -1,28 +1,41 @@
 {
- "about": "Rows the checker evaluates. Signal kinds: blocker (issue: open = broken), fix (PR: merged = fixed, open = in review), release (owner/repo@tag published = fixed), code (owner/repo:path on the default branch; a regex that means fixed or broken), context (shown, never decides), manual (a dated note with a link). Evidence verified 2026-10-24; rows added and re-verified 2026-10-28.",
+ "about": "Rows the checker evaluates. Signal kinds: blocker (issue: open = broken), fix (PR: merged = fixed, open = in review), release (owner/repo@tag published = fixed), code (owner/repo:path on the default branch; a regex that means fixed or broken), context (shown, never decides), manual (a dated note with a link). Evidence verified 2026-10-24; rows added and re-verified 2026-10-28; every row re-checked by hand 2026-11-15.",
  "rows": [
   {
    "id": "trust-wallet-core",
    "name": "Trust Wallet Core",
    "category": "Signing library",
-   "note": "Fixed in release 4.9.1 (6 Nov, PR #4934): Wallet Core now builds v5 Zcash transactions by default. The app still supplies the branch ID, so apps must update to 4.9.1 or later and pass NU7's 0x77190AD9. Until they do, sends built by older versions are v4, which NU7 rejects. Vultisig added its own v5 code instead (#6151).",
+   "note": "Fixed in 4.9.1 (tagged 6 Nov, PR #4934; first GitHub release with it: 4.9.3, 11 Nov): Wallet Core now builds v5 Zcash transactions by default. The app still supplies the branch ID, so apps must update to 4.9.1 or later and pass NU7's 0x77190AD9. Until they do, sends built by older versions are v4, which NU7 rejects. Trust Wallet's own browser extension hadn't updated as of 14 Nov (next row). Vultisig added its own v5 code instead (#6151).",
    "signals": [
     {"kind": "code", "ref": "trustwallet/wallet-core:rust/chains/tw_zcash/src/modules/signing_request.rs", "pattern": "ZcashTransactionVersion::V5 \\| ZcashTransactionVersion::UseDefault", "means": "fixed", "label": "v5 is the default transaction version"},
-    {"kind": "release", "ref": "trustwallet/wallet-core@4.9.1"},
+    {"kind": "release", "ref": "trustwallet/wallet-core@4.9.3"},
     {"kind": "blocker", "ref": "trustwallet/wallet-core#4910"},
     {"kind": "fix", "ref": "trustwallet/wallet-core#4934"},
     {"kind": "context", "ref": "ZcashCommunityGrants/zcashcommunitygrants#511", "label": "Grant application for a Wallet Core v5 repair (still open, now fixed upstream)"}
    ]
   },
   {
+   "id": "trust-wallet-extension",
+   "name": "Trust Wallet browser extension",
+   "category": "Wallet",
+   "note": "Two users reported on #4910 (12 and 14 Nov) that the Chrome extension from the Web Store (26.45.1, 6 Nov) still signs ZEC as v4, so nodes reject transparent sends with \"transaction version 4 not supported by the network upgrade Nu7\". One reporter found the extension's code isn't built from Wallet Core 4.9.1 or later. A rejected send moves no funds; the ZEC stays in the wallet but can't be sent from the extension until it updates. The extension's source isn't public, so this row rests on those reports; the mobile apps weren't checked.",
+   "signals": [
+    {"kind": "blocker", "ref": "trustwallet/wallet-core#4910"},
+    {"kind": "manual", "label": "User report: extension 26.45.1 still signs v4", "url": "https://github.com/trustwallet/wallet-core/issues/4910#issuecomment-6823498319", "checked": "2026-11-15"},
+    {"kind": "manual", "label": "User report: send rejected at broadcast (v4 not supported under NU7)", "url": "https://github.com/trustwallet/wallet-core/issues/4910#issuecomment-6878093040", "checked": "2026-11-15"}
+   ]
+  },
+  {
    "id": "vultisig-swapkit",
    "name": "Vultisig: SwapKit ZEC swaps",
    "category": "Swap",
-   "note": "SwapKit now builds ZEC swaps as v5 with the NU7 branch ID (read 6 Nov on its Maya, THORChain and Flashnet routes; its NEAR route wasn't tested). Vultisig's SwapKit signers still accept only v4 (Android 1.0.124, iOS 1.50.80), so from the code these swaps stop with an error before signing and no funds move. Normal sends and THORChain or Maya swaps outside SwapKit moved to v5 in #6151, and #6115 was closed on that basis.",
+   "note": "SwapKit builds ZEC swaps as v5 with the NU7 branch ID (read 6 Nov on its Maya, THORChain and Flashnet routes; its NEAR route wasn't tested). Vultisig merged v5 SwapKit signers on 13 Nov (Android #6174, iOS #5685), which also refuse v4 and any branch ID other than the live one. The latest app releases (Android 1.0.124, iOS 1.50.80, both 6 Nov) predate that, so until the next release these swaps still stop with an error before signing and no funds move. Normal sends and THORChain or Maya swaps outside SwapKit moved to v5 earlier in #6151.",
    "signals": [
-    {"kind": "code", "ref": "vultisig/vultisig-android:data/src/main/kotlin/com/vultisig/wallet/data/chains/helpers/SwapKitZcashSigner.kt", "pattern": "v5[\\s*]+NU5\\s+hard-rejected", "means": "broken", "label": "Signer accepts Sapling v4 only"},
-    {"kind": "code", "ref": "vultisig/vultisig-ios:VultisigApp/VultisigApp/Blockchain/UTXO/Signing/SwapKitZcashSigner.swift", "pattern": "guard version == saplingTxVersion", "means": "broken", "label": "iOS signer accepts Sapling v4 only"},
-    {"kind": "context", "ref": "vultisig/vultisig-android#6115", "label": "Closed 6 Nov; #6151 left the SwapKit path unchanged"},
+    {"kind": "fix", "ref": "vultisig/vultisig-android#6174"},
+    {"kind": "fix", "ref": "vultisig/vultisig-ios#5685"},
+    {"kind": "code", "ref": "vultisig/vultisig-android:data/src/main/kotlin/com/vultisig/wallet/data/chains/helpers/SwapKitZcashSigner.kt", "pattern": "ZCASH_TX_VERSION = 0x80000005L", "means": "fixed", "label": "Android signer builds v5"},
+    {"kind": "code", "ref": "vultisig/vultisig-ios:VultisigApp/VultisigApp/Blockchain/UTXO/Signing/SwapKitZcashSigner.swift", "pattern": "nu5TxVersion: UInt32 = 0x80000005", "means": "fixed", "label": "iOS signer builds v5"},
+    {"kind": "context", "ref": "vultisig/vultisig-android#6115", "label": "Closed 6 Nov; #6151 left the SwapKit path unchanged until #6174"},
     {"kind": "context", "ref": "vultisig/vultisig-android#6151", "label": "v5 for sends and THORChain/Maya swaps, not SwapKit"},
     {"kind": "context", "ref": "ZcashCommunityGrants/zcashcommunitygrants#513", "label": "Cryppit grant request for v5 swap signing (withdrawn 8 Nov)"}
    ]
@@ -51,7 +64,7 @@
    "id": "trezor-suite",
    "name": "Trezor Suite and Blockbook (ZEC)",
    "category": "Wallet",
-   "note": "Blockbook's Zcash config still pins Zebra 6.2.2, and its open PR says both backends need 7.0.0 before activation. Suite's fallback branch ID is also still NU6.3, used only when neither the caller nor Blockbook gives one. Trezor's own servers may already be updated; that can't be seen publicly.",
+   "note": "Blockbook's Zcash config moved to Zebra 7.0.0 for NU7 (#1873, merged 13 Nov), and Suite's fallback branch ID, used only when neither the caller nor Blockbook gives one, is now NU7's 0x77190AD9 (#34308, merged 9 Nov). A Suite release and Trezor's own servers carry these on their own schedule, which can't be seen publicly.",
    "signals": [
     {"kind": "fix", "ref": "trezor/blockbook#1873"},
     {"kind": "fix", "ref": "trezor/trezor-suite#34308"},
@@ -168,25 +181,27 @@
    "id": "thorchain",
    "name": "THORChain ZEC",
    "category": "Swap",
-   "note": "ZEC trading was halted around 19 Oct after an outbound matching bug; the fix is in THORChain v3.21.0 (about 23 Oct). No NU7-specific notice found.",
+   "note": "ZEC is live: on 15 Nov THORNode reported the ZEC chain, signing and trading all unhalted and the pool available. The vault's sends since NU7 are v6 transactions (the latest read was mined in block 3,574,395 on 15 Nov), so they are signed under NU7's rules. The 19 Oct trading halt (an outbound matching bug) was fixed in v3.21.0.",
    "signals": [
-    {"kind": "manual", "label": "Halt and fix report", "url": "https://cryptobriefing.com/thorchain-halts-zec-swaps-rune-bug/", "checked": "2026-10-24"}
+    {"kind": "manual", "label": "Vault send after NU7: v6, block 3,574,395", "url": "https://blockchair.com/zcash/transaction/7490bc2134b62be648f2dd65f8827076d9e0605bf5f73a56253bd39441da12b3", "checked": "2026-11-15", "means": "fixed"},
+    {"kind": "manual", "label": "Earlier halt and fix report", "url": "https://cryptobriefing.com/thorchain-halts-zec-swaps-rune-bug/", "checked": "2026-10-24"}
    ]
   },
   {
    "id": "maya",
    "name": "Maya Protocol ZEC",
    "category": "Swap",
-   "note": "The network halted after a 19 Aug exploit, yet a Maya ZEC route was still quoted on 23 Oct. The sources conflict; treat the route as unconfirmed.",
+   "note": "ZEC is live: on 15 Nov MAYANode reported the ZEC chain and trading unhalted and the pool available, so the halt after the 19 Aug exploit is over. The vault's sends since NU7 are v5 transactions (the latest read was mined in block 3,574,711 on 15 Nov), so they are signed under NU7's branch ID.",
    "signals": [
-    {"kind": "manual", "label": "Exploit and halt report", "url": "https://crypto.news/maya-protocol-suffers-1-7-million-exploit-halts-network/", "checked": "2026-10-24"}
+    {"kind": "manual", "label": "Vault send after NU7: v5, block 3,574,711", "url": "https://blockchair.com/zcash/transaction/a965353c71d9acba0210d5cccef9bcae9c488d999c9fb94d11f3d35a1036daf8", "checked": "2026-11-15", "means": "fixed"},
+    {"kind": "manual", "label": "Earlier exploit and halt report", "url": "https://crypto.news/maya-protocol-suffers-1-7-million-exploit-halts-network/", "checked": "2026-10-24"}
    ]
   },
   {
    "id": "mining-infra",
    "name": "sovright mining-infra",
    "category": "Mining",
-   "note": "Open checklist of mining-infrastructure work to finish before Mainnet activation. The final NU7 crates and the pre-activation peer floor merged on 26 Oct (#128, #129); 16 of 27 checklist items were still open on 30 Oct, including relay and pool-server qualification on NU7 blocks.",
+   "note": "Open checklist of mining-infrastructure work to finish before Mainnet activation. The final NU7 crates and the pre-activation peer floor merged on 26 Oct (#128, #129); the checklist, last edited 30 Oct, still shows 16 of 27 items open on 15 Nov, including relay and pool-server qualification on NU7 blocks, while ingress fixes keep landing (12–14 Nov).",
    "signals": [
     {"kind": "blocker", "ref": "sovright/mining-infra#121"}
    ]
@@ -296,11 +311,11 @@
    "id": "shapeshift",
    "name": "ShapeShift",
    "category": "Wallet",
-   "note": "Fixed in #12825 (merged 6 Nov): Zcash sends had used a fixed NU6.3 branch ID (0x37a5165b), which NU7 nodes reject. Cryppit filed the issue. Still open: #12831, without which coins received in a v6 transaction (ZEC paid out by NEAR Intents, for example) can't be spent from ShapeShift's native or Ledger signer.",
+   "note": "Fixed in #12825 (merged 6 Nov): Zcash sends had used a fixed NU6.3 branch ID (0x37a5165b), which NU7 nodes reject. Cryppit filed the issue. #12831 (merged 9 Nov) lets the native and Ledger signers spend coins received in a v6 transaction, such as ZEC paid out by NEAR Intents.",
    "signals": [
     {"kind": "blocker", "ref": "shapeshift/web#12794"},
     {"kind": "fix", "ref": "shapeshift/web#12825"},
-    {"kind": "context", "ref": "shapeshift/web#12831", "label": "Open: spend coins from v6 transactions on native and Ledger"},
+    {"kind": "context", "ref": "shapeshift/web#12831", "label": "Merged 9 Nov: spend coins from v6 transactions on native and Ledger"},
     {"kind": "code", "ref": "shapeshift/web:packages/hdwallet-core/src/bitcoin.ts", "pattern": "ZCASH_CONSENSUS_BRANCH_ID = 0x37a5165b", "means": "broken", "label": "Branch ID fixed to NU6.3"}
    ]
   },
@@ -308,10 +323,10 @@
    "id": "gem-wallet",
    "name": "Gem Wallet",
    "category": "Wallet",
-   "note": "Self-custodial mobile wallet (iOS and Android) with transparent ZEC only, no shielded sends. It builds v5 transactions and takes the consensus branch ID from its own Zebra node, so it moved to NU7's 0x77190AD9 with no code change. A transparent send mined in block 3,543,437, 32 blocks after activation, is a v5 transaction signed under 0x77190AD9 (read from the chain on 8 Nov).",
+   "note": "Self-custodial mobile wallet (iOS and Android) with transparent ZEC only, no shielded sends. It builds v5 transactions and takes the consensus branch ID from its own Zebra node, so it moved to NU7's 0x77190AD9 with no code change. On 9 Nov (#1840) its Zcash code moved into its own gem_zcash crate, which takes the branch ID for the next block. A transparent send mined in block 3,543,437, 32 blocks after activation, is a v5 transaction signed under 0x77190AD9 (read from the chain on 8 Nov).",
    "signals": [
-    {"kind": "code", "ref": "gemwalletcom/wallet:core/crates/gem_bitcoin/src/provider/preload_mapper.rs", "pattern": "consensus\\.ok_or\\(\"Branch ID not found\"\\)\\?\\.chaintip", "means": "fixed", "label": "Branch ID read from the node's chain tip"},
-    {"kind": "code", "ref": "gemwalletcom/wallet:core/crates/gem_bitcoin/src/signer/zcash.rs", "pattern": "OVERWINTERED_VERSION_5: u32 = 0x8000_0005", "means": "fixed", "label": "Builds v5 transparent transactions"},
+    {"kind": "code", "ref": "gemwalletcom/wallet:core/crates/gem_zcash/src/provider/preload.rs", "pattern": "consensus\\.ok_or\\(\"Branch ID not found\"\\)\\?\\.nextblock", "means": "fixed", "label": "Branch ID read from the node, for the next block"},
+    {"kind": "code", "ref": "gemwalletcom/wallet:core/crates/gem_zcash/src/signer/transaction/builder.rs", "pattern": "OVERWINTERED_VERSION_5: u32 = 0x8000_0005", "means": "fixed", "label": "Builds v5 transparent transactions"},
     {"kind": "manual", "label": "Mainnet v5 send under 0x77190AD9 (block 3,543,437)", "url": "https://blockchair.com/zcash/transaction/91b580368de6a182f7d61b54aec7ea92d61137bb9cd714609745bdcfad6b625f", "checked": "2026-11-08", "means": "fixed"}
    ]
   },
@@ -378,9 +393,10 @@
    "id": "zelcore-utxo-lib",
    "name": "ZelCore utxo-lib",
    "category": "Signing library",
-   "note": "ZelCore's UTXO library defaults Zcash to the NU6.3 branch ID at most, with no NU7 change or issue. Whether the ZelCore app passes its own branch ID is not visible.",
+   "note": "ZelCore's UTXO library added NU7's branch ID 0x77190AD9 and the final ZIP 244 signature digest on 7 Nov (PR #9, version 9.39.4). npm still serves 9.37.3 (16 Oct), and whether the ZelCore app has shipped the new version isn't visible.",
    "signals": [
-    {"kind": "manual", "label": "Zcash default branch ID is NU6.3", "url": "https://github.com/ZelCore-io/bitgo-utxo-lib-ts/blob/HEAD/src/bitgo/zcash/ZcashTransaction.ts", "checked": "2026-10-28"}
+    {"kind": "fix", "ref": "ZelCore-io/bitgo-utxo-lib-ts#9"},
+    {"kind": "code", "ref": "ZelCore-io/bitgo-utxo-lib-ts:src/bitgo/zcash/ZcashTransaction.ts", "pattern": "NU7_BRANCH_ID = 0x77190ad9", "means": "fixed", "label": "NU7 branch ID present"}
    ]
   }
  ]

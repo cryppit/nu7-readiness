@@ -43,8 +43,9 @@ Open an issue with the evidence (a PR, a release, a commit or a maintainer state
 
 ## Disclosure
 
-Run by [Cryppit](https://github.com/cryppit). Cryppit filed some linked items (vultisig-android #6115, grant application
-ZCG #513) and has a grant application in review for the Vultisig/SwapKit swap path.
+Run by [Cryppit](https://github.com/cryppit). Cryppit filed some of the linked items: shapeshift/web #12794 and
+vultisig-android #6115. Its grant request for the Vultisig/SwapKit swap path (ZCG #513) was withdrawn on 8 Nov, because
+Vultisig is doing that work itself.
 
 ## Licence
 
