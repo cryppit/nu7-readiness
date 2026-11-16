@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Check your wallet · NU7 readiness · Cryppit</title>
+<meta name="description" content="Pick your Zcash wallet to see whether it can send after NU7, or paste the error it showed. Runs in your browser.">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="NU7 readiness: can your Zcash wallet send?">
+<meta property="og:description" content="Which Zcash wallets, libraries, bridges and swaps are ready for NU7, from public evidence. Re-checked every hour, by Cryppit.">
+<meta property="og:url" content="https://cryppit.github.io/nu7-readiness/check.html">
+<meta property="og:image" content="https://cryppit.github.io/nu7-readiness/icons/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#04061a">
+<link rel="stylesheet" href="style.css?v=2">
+</head>
+<body data-page="check">
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="./" aria-label="Cryppit NU7 readiness, overview">Crypp<b>it</b></a>
+    <span class="crumb">NU7 readiness</span>
+    <span class="checked" id="top-checked"></span>
+  </div>
+  <nav class="tabs" aria-label="Pages"><div class="wrap"><a href="./">Overview</a><a href="check.html" aria-current="page">Check your wallet</a><a href="board.html">Board</a><a href="deadlines.html">Deadlines</a><a href="changes.html">What changed</a></div></nav>
+</header>
+<main class="wrap">
+  <section class="page-head">
+    <h1>Check your wallet</h1>
+    <p class="lede">Both checks run in your browser. Nothing you choose or paste is sent anywhere.</p>
+  </section>
+  <div class="tools">
+    <section class="panel tool" aria-labelledby="send-title">
+      <h3 id="send-title">Can it send?</h3>
+      <p class="sub">Pick your wallet or app to get a yes, not yet or not clear, with what to do next.</p>
+      <label for="wallet">Your wallet or app</label>
+      <select id="wallet" disabled><option value="">Loading the latest check…</option></select>
+      <div id="answer" class="answer" aria-live="polite"></div>
+    </section>
+    <section class="panel tool" aria-labelledby="decode-title">
+      <h3 id="decode-title">What does my error mean?</h3>
+      <p class="sub">Paste the error your wallet or node showed.</p>
+      <label for="err">Error text</label>
+      <textarea id="err" rows="3" spellcheck="false" autocomplete="off" placeholder="transaction version 4 not supported by the network upgrade Nu7"></textarea>
+      <button type="button" class="btn" id="explain">Explain</button>
+      <div id="decoded" class="answer" aria-live="polite"></div>
+      <p class="hint">Never paste a recovery phrase or a private key into any page, this one included.</p>
+    </section>
+  </div>
+  <div class="panel related">
+    <span><b>Withdrew ZEC from an exchange?</b> <span class="muted">See whether it landed shielded or transparent, and in which pool.</span></span>
+    <a class="go" href="https://cryppit.github.io/shield-receipt/">Shield Receipt →</a>
+  </div>
+
+  <footer>
+    <p id="checked">Last checked: …</p>
+    <p>What leaves your browser: one request for this board's own data file. The hourly checker reads public GitHub and the Blockchair explorer; this page reads nothing else and stores nothing.</p>
+    <p>Rows and the rules behind each status are in <a href="https://github.com/cryppit/nu7-readiness">github.com/cryppit/nu7-readiness</a>. Corrections with public evidence are welcome as issues.</p>
+    <p>Run by <a href="https://github.com/cryppit">Cryppit</a>. Cryppit filed some of the linked items: shapeshift/web #12794 and vultisig-android #6115. Its grant request for the Vultisig/SwapKit swap path (ZCG #513) was withdrawn on 8 Nov, because Vultisig is doing that work itself. Project names and marks belong to their owners; logo sources are listed in <a href="https://github.com/cryppit/nu7-readiness/blob/main/logos/LICENSE">logos/LICENSE</a>.</p>
+  </footer>
+</main>
+<script src="nu7.js?v=2"></script>
+<script src="app.js?v=2"></script>
+</body>
+</html>

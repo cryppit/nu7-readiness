@@ -52,17 +52,19 @@ function signalItem(s) {
   let state = STATE[s.state] || s.state;
   if (s.kind === "context" && (s.state === "completed" || s.state === "not_planned")) state = "closed";
   const text = s.kind === "manual" ? s.label : (s.label || s.title);
+  const linkText = s.ref || text;
   const what = el("span", { class: "what" }, state);
-  if (text && text !== s.ref) what.append(` · ${text}`);
+  if (text && text !== linkText) what.append(` · ${text}`);
   const d = s.kind === "manual" ? `checked ${short(s.checked)}` : short(day(s.updated_at));
   return el("li", {},
     el("span", { class: "kind" }, KIND[s.kind] || s.kind),
-    el("span", {}, el("a", { href: s.url, rel: "noopener" }, s.ref || text), what),
+    el("span", {}, el("a", { href: s.url, rel: "noopener" }, linkText), what),
     el("span", { class: "d" }, d));
 }
 
 function render() {
   const rows = document.getElementById("rows");
+  if (!rows) return;
   const q = query.trim().toLowerCase();
   const list = data.rows
     .filter((r) => filter === "all" || r.status === filter)
@@ -86,6 +88,8 @@ function render() {
 
 function filters() {
   const box = document.getElementById("filters");
+  if (!box) return;
+  $("legend").replaceChildren(...ORDER.map((s) => el("span", { title: MEANS[s] }, cell(s), `${LABEL[s]}: ${MEANS[s]}`)));
   const all = el("button", { type: "button", class: "chip all", "data-f": "all", "aria-pressed": "true" }, `All ${data.rows.length}`);
   const chips = ORDER.filter((s) => s !== "unknown" || data.counts.unknown)
     .map((s) => el("button", { type: "button", class: "chip", "data-f": s, "aria-pressed": "false" }, cell(s), `${LABEL[s]} ${data.counts[s] || 0}`));
@@ -94,25 +98,28 @@ function filters() {
   document.getElementById("q").addEventListener("input", (e) => { query = e.target.value; render(); });
 }
 
+function $(id) { return document.getElementById(id); }
 function strip() {
   const c = data.chain || {};
-  document.getElementById("tip").textContent = fmt(c.tip);
   const total = data.rows.length;
   const ready = data.counts.fixed || 0;
+  $("checked").textContent = `Last checked: ${when(data.checked_at)}. Re-checked every hour.`;
+  $("top-checked").textContent = `checked ${short(day(data.checked_at))}, ${data.checked_at.slice(11, 16)} UTC`;
+  if ($("go-board")) $("go-board").textContent = `${total} projects: ${ready} ready, ${total - ready} not yet. Every status with its evidence.`;
+  if (!$("tip")) return;
+  $("tip").textContent = fmt(c.tip);
   document.getElementById("live-text").textContent = c.active
     ? `NU7 is live · ${ready} of ${total} tracked projects are ready`
     : `NU7 is not active yet · ${ready} of ${total} tracked projects are ready`;
   const bar = document.getElementById("bar");
   bar.setAttribute("aria-label", ORDER.map((s) => `${LABEL[s]} ${data.counts[s] || 0}`).join(", "));
   bar.replaceChildren(...["fixed", "in-review", "watch", "unknown", "broken"].filter((s) => data.counts[s])
-    .map((s) => el("span", { class: `b-${s}`, style: `width:${(100 * data.counts[s]) / total}%`, title: `${LABEL[s]}: ${data.counts[s]}` })));
+    .map((s) => { const b = el("span", { class: `b-${s}`, title: `${LABEL[s]}: ${data.counts[s]}` }); b.style.width = `${(100 * data.counts[s]) / total}%`; return b; }));
   const tally = (s) => el("span", {}, cell(s), el("b", {}, String(data.counts[s] || 0)), LABEL[s].toLowerCase());
   document.getElementById("tally").replaceChildren(...["fixed", "in-review", "watch", "broken"].map(tally));
-  document.getElementById("legend").replaceChildren(...ORDER.map((s) => el("span", { title: MEANS[s] }, cell(s), `${LABEL[s]}: ${MEANS[s]}`)));
   const banners = document.getElementById("banners");
   if (stale()) banners.append(el("p", { class: "banner" }, `This data is from ${when(data.checked_at)}, more than 8 hours ago. Statuses may have changed.`));
   if (c.error) banners.append(el("p", { class: "banner" }, "The chain height could not be read in the last check."));
-  document.getElementById("checked").textContent = `Last checked: ${when(data.checked_at)}. Re-checked every hour.`;
 }
 
 function answerBox(box, cls, status, title, lines, extra) {
@@ -123,6 +130,7 @@ function answerBox(box, cls, status, title, lines, extra) {
 const VERDICT_CELL = { yes: "fixed", "not-yet": "in-review", no: "broken", unclear: "watch", unknown: "unknown" };
 function sendCheck() {
   const select = document.getElementById("wallet");
+  if (!select) return;
   const choices = NU7.pickerRows(data.rows);
   select.replaceChildren(el("option", { value: "" }, "Choose…"), ...choices.map((c) => el("option", { value: c.id }, c.label)));
   select.disabled = false;
@@ -133,11 +141,7 @@ function sendCheck() {
     const a = NU7.sendAnswer(row, { stale: stale() });
     const [who, what] = NEXT[a.verdict] || NEXT.unknown;
     const next = el("p", { class: "next" }, "Who acts next: ", el("b", {}, who), ` · ${what}`);
-    const link = el("p", { class: "next" }, el("a", { href: `#${row.id}` }, "See the evidence on the board"));
-    link.firstChild.addEventListener("click", () => {
-      filter = "all"; query = ""; document.getElementById("q").value = ""; render();
-      const d = document.getElementById(row.id); if (d) d.open = true;
-    });
+    const link = el("p", { class: "next" }, el("a", { href: `board.html#${row.id}` }, "See the evidence on the board"));
     answerBox(box, `a-${a.verdict}`, VERDICT_CELL[a.verdict] || "unknown", a.headline, [a.summary, ...a.lines], [next, link]);
   });
 }
@@ -149,10 +153,13 @@ function decode() {
   const link = d.source ? el("p", { class: "next" }, "Source: ", el("a", { href: d.source, rel: "noopener" }, d.source.replace("https://github.com/", ""))) : null;
   answerBox(box, d.id === "unknown" ? "a-unknown" : "a-decoded", d.id === "unknown" ? "unknown" : "watch", d.title, d.lines, [link]);
 }
-document.getElementById("explain").addEventListener("click", decode);
-document.getElementById("err").addEventListener("paste", () => setTimeout(decode, 0));
+if ($("explain")) {
+  $("explain").addEventListener("click", decode);
+  $("err").addEventListener("paste", () => setTimeout(decode, 0));
+}
 
 function deadlinesList(chain, checkedAt) {
+  if (!document.getElementById("deadlines")) return;
   const STATUS = { upcoming: "Upcoming", proposed: "Proposed", passed: "Passed" };
   document.getElementById("deadlines").replaceChildren(...NU7.deadlines(chain, checkedAt).map((d) => {
     const links = el("p", { class: "links" });
@@ -163,18 +170,57 @@ function deadlinesList(chain, checkedAt) {
 }
 deadlinesList(null, null);
 
+// The wheel on the overview: every tracked project, ready ones on the outer ring, the rest on the inner ring.
+const LOGO = {
+  "trust-wallet-core": "trust.svg", "trust-wallet-extension": "trust.svg", "trezor-suite": "trezor.svg", "trezor-firmware": "trezor.svg",
+  "swapkit-trezor": "trezor.svg", "zondax-ledger": "ledger.svg", "ledger-live": "ledger.svg", "ledger-hw-app-btc": "ledger.svg",
+  edge: "edge.png", zingolib: "zingo.png", "zodl-android": "zodl.png", "zodl-ios": "zodl.png", keystone: "keystone.png",
+  "vultisig-swapkit": "vultisig.png", thorchain: "rune.svg", "omni-zec": "near-protocol.svg", "near-omni-tx": "near-protocol.svg",
+  "defuse-utxo-lib": "near-protocol.svg",
+};
+function wheel() {
+  const box = $("wheel");
+  if (!box) return;
+  const tip = $("w-tip");
+  const ready = data.rows.filter((r) => r.status === "fixed").sort((a, b) => a.name.localeCompare(b.name));
+  const rest = data.rows.filter((r) => r.status !== "fixed").sort((a, b) => ORDER.indexOf(a.status) - ORDER.indexOf(b.status) || a.name.localeCompare(b.name));
+  const show = (r) => tip.replaceChildren(el("b", {}, r.name), ` · ${LABEL[r.status]} · ${r.category}`);
+  const rings = [["outer", ready], ["inner", rest]].map(([kind, list]) => {
+    const ring = el("div", { class: `w-ring ${kind}` });
+    list.forEach((r, i) => {
+      const face = el("span", { class: `w-face s-${r.status}${LOGO[r.id] ? " has-logo" : ""}` },
+        LOGO[r.id] ? el("img", { src: `logos/${LOGO[r.id]}`, alt: "" }) : r.name.replace(/^the /i, "").slice(0, 1).toUpperCase(),
+        el("span", { class: `dot s-${r.status}`, "aria-hidden": "true" }, GLYPH[r.status]));
+      const coin = el("a", { class: "w-coin", href: `board.html#${r.id}`, "aria-label": `${r.name}: ${LABEL[r.status]}`, title: `${r.name}: ${LABEL[r.status]}` }, face);
+      coin.style.setProperty("--a", `${(360 / list.length) * i}deg`);
+      coin.addEventListener("mouseenter", () => show(r));
+      coin.addEventListener("focus", () => show(r));
+      ring.append(coin);
+    });
+    return ring;
+  });
+  box.replaceChildren(...rings, el("div", { class: "w-hub" },
+    el("img", { src: "logos/token-zec.svg", alt: "" }), el("b", {}, `${ready.length} / ${data.rows.length}`), el("small", {}, "ready for NU7")));
+  $("w-key").replaceChildren(...["fixed", "in-review", "watch", "broken"].filter((s) => data.counts[s])
+    .map((s) => el("span", {}, cell(s), `${LABEL[s]} ${data.counts[s]}`)));
+}
+
 // Open the row named in the URL hash (links from posts point at #row-id).
 function openFromHash() {
   const id = decodeURIComponent(location.hash.slice(1));
+  // Links from before the board had its own page point at /#row-id: send them to the board.
+  if (id && document.body.dataset.page === "home" && data.rows.some((r) => r.id === id)) { location.replace(`board.html#${encodeURIComponent(id)}`); return; }
   const d = id && document.getElementById(id);
   if (d && d.tagName === "DETAILS") { d.open = true; d.scrollIntoView(); }
 }
 
 fetch("data/status.json", { cache: "no-store" })
   .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
-  .then((d) => { data = d; strip(); filters(); render(); sendCheck(); deadlinesList(d.chain, d.checked_at); openFromHash(); })
+  .then((d) => { data = d; strip(); wheel(); filters(); render(); sendCheck(); deadlinesList(d.chain, d.checked_at); openFromHash(); })
   .catch((e) => {
-    document.getElementById("live-text").textContent = "The latest check could not be loaded";
-    document.getElementById("rows").replaceChildren(el("p", { class: "empty error" }, `The latest check could not be loaded (${e.message}).`));
-    document.getElementById("wallet").replaceChildren(el("option", { value: "" }, "Unavailable: the latest check could not be loaded"));
+    const msg = `The latest check could not be loaded (${e.message}).`;
+    if ($("live-text")) $("live-text").textContent = "The latest check could not be loaded";
+    if ($("rows")) $("rows").replaceChildren(el("p", { class: "empty error" }, msg));
+    if ($("wheel")) $("w-tip").textContent = msg;
+    if ($("wallet")) $("wallet").replaceChildren(el("option", { value: "" }, "Unavailable: the latest check could not be loaded"));
   });

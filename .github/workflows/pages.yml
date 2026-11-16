@@ -30,7 +30,7 @@ jobs:
       - run: python3 check.py --out _site/data/status.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: cp -r index.html nu7.js app.js icons _site/ && touch _site/.nojekyll
+      - run: cp -r *.html style.css nu7.js app.js icons logos _site/ && touch _site/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

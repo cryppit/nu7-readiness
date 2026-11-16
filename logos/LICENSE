@@ -1,0 +1,33 @@
+Logos in this folder, and where they come from. Every file is used unmodified (SVGs that shipped wrapped in a JS
+string were unwrapped to plain SVG). The marks belong to their owners; they appear here only to name each service.
+
+1. SVGs (*.svg): @web3icons/core 4.0.58, dist/svgs/{networks,tokens,exchanges,wallets}/branded,
+   https://github.com/0xa3k5/web3icons, MIT License, Copyright (c) 2024 0xa3k5 (full text below).
+2. Wallet app icons (*.png), each from the wallet's own open-source repository, under that repository's licence:
+   - zodl.png      zodl-inc/zodl-ios, secant/Resources/Assets.xcassets/AppIcon.appiconset/144.png (MIT)
+   - keystone.png  zodl-inc/zodl-ios, secant/Resources/Assets.xcassets/Partners/keystoneLogo.imageset (MIT)
+   - zingo.png     zingolabs/zingo-mobile, ios/Zingo/Images.xcassets/AppIcon-Prod.appiconset/Icon-128.png (MIT)
+   - zkool.png     hhanh00/zkool2, macos/Runner/Assets.xcassets/AppIcon.appiconset/app_icon_128.png (MIT)
+   - ywallet.png   hhanh00/zwallet, android/app/src/main/res/mipmap-xxxhdpi/launcher_icon.png (MIT)
+   - edge.png      EdgeApp/edge-react-gui, android/app/src/main/res/mipmap-hdpi/ic_launcher_round.png (BSD-3-Clause)
+   - cake.png      cake-tech/cake_wallet, assets/images/cakewallet_android_icon/mipmap-xxhdpi/ic_launcher.png (MIT)
+   - vultisig.png  vultisig/vultisig-ios, VultisigApp/VultisigApp/Assets.xcassets/AppIconMacOS.appiconset/Vultisig128.png (Apache-2.0)
+   Gem (GPL-3.0), Brave (MPL-2.0), Keystone's own repository (licence unclear) and Unstoppable (vector-only icon) are
+   not copied; those wallets show a letter instead.
+
+MIT License (web3icons)
+
+Copyright (c) 2024 0xa3k5
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

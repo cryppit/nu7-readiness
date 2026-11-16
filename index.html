@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="referrer" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
 <title>NU7 readiness · Cryppit</title>
 <meta name="description" content="Can your Zcash wallet send after NU7? Which wallets, libraries, bridges and swaps are ready, from public evidence, re-checked every hour. Keyless and read-only.">
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
@@ -19,179 +19,35 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#04061a">
-<style>
-  :root {
-    --bg: #04061a; --panel: #0b1030; --panel2: #0e1438; --ink: #eef1ff; --mute: #8c93c0; --line: #1b2250; --lime: #c7f23a;
-    --yes: #36d07a; --no: #5a608c; --unknown: #8c93c0; --warn: #f2b84a;
-    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  }
-  * { box-sizing: border-box; }
-  html { scroll-padding-top: 64px; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  a { color: var(--ink); text-decoration-color: var(--line); text-underline-offset: 3px; }
-  a:hover { color: var(--lime); text-decoration-color: var(--lime); }
-  :focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; border-radius: 6px; }
-  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
-  .mono { font-family: var(--mono); }
-  .muted { color: var(--mute); }
-
-  /* header */
-  .top { position: sticky; top: 0; z-index: 5; background: rgba(4, 6, 26, 0.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
-  .top .wrap { display: flex; align-items: center; gap: 16px; height: 52px; }
-  .logo { font-weight: 800; letter-spacing: 0.3px; text-decoration: none; }
-  .logo b { color: var(--lime); }
-  .crumb { color: var(--mute); font-size: 14px; }
-  .top nav { margin-left: auto; display: flex; gap: 4px; }
-  .top nav a { color: var(--mute); text-decoration: none; font-size: 14px; padding: 6px 10px; border-radius: 8px; }
-  .top nav a:hover { color: var(--ink); background: var(--panel); }
-  @media (max-width: 640px) { .top nav { display: none; } }
-
-  /* hero */
-  .hero { padding: 36px 0 8px; }
-  h1 { font-size: 28px; line-height: 1.2; margin: 0 0 8px; }
-  .lede { color: var(--mute); max-width: 680px; margin: 0 0 14px; }
-  .stamps { display: flex; flex-wrap: wrap; gap: 8px; }
-  .stamp { font-size: 12px; color: var(--lime); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; }
-  h2 { font-size: 20px; margin: 44px 0 6px; }
-  .sub { color: var(--mute); margin: 0 0 16px; font-size: 15px; }
-
-  /* status strip */
-  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; }
-  .strip { margin-top: 24px; padding: 18px 20px; display: grid; gap: 16px; }
-  .strip-head { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: baseline; }
-  .live { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
-  .live i { width: 8px; height: 8px; border-radius: 50%; background: var(--yes); box-shadow: 0 0 0 3px rgba(54, 208, 122, 0.18); }
-  .facts-inline { color: var(--mute); font-size: 14px; }
-  .facts-inline b { color: var(--ink); font-weight: 600; }
-  .bar { display: flex; height: 10px; border-radius: 999px; overflow: hidden; background: var(--line); }
-  .bar span { display: block; height: 100%; }
-  .bar .b-fixed { background: var(--yes); } .bar .b-in-review { background: rgba(54, 208, 122, 0.45); }
-  .bar .b-watch { background: var(--warn); } .bar .b-broken { background: #c6cbea; } .bar .b-unknown { background: var(--no); }
-  .tally { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; color: var(--mute); }
-  .tally span { display: inline-flex; align-items: center; gap: 6px; }
-  .tally b { color: var(--ink); }
-  .banner { margin: 0; border-radius: 10px; padding: 10px 14px; font-size: 14px; background: rgba(242, 184, 74, 0.08); border: 1px solid rgba(242, 184, 74, 0.4); color: var(--warn); }
-
-  /* verdict cells */
-  .cell { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 22px; height: 22px; border-radius: 7px; font: 700 13px/1 system-ui, sans-serif; }
-  .c-fixed { background: rgba(54, 208, 122, 0.15); color: var(--yes); }
-  .c-in-review { background: rgba(54, 208, 122, 0.08); color: rgba(54, 208, 122, 0.85); box-shadow: inset 0 0 0 1px rgba(54, 208, 122, 0.35); }
-  .c-watch { background: rgba(242, 184, 74, 0.14); color: var(--warn); }
-  .c-broken { background: rgba(198, 203, 234, 0.12); color: #e4e7fb; box-shadow: inset 0 0 0 1px rgba(198, 203, 234, 0.35); }
-  .c-unknown, .c-proposed, .c-passed { background: rgba(90, 96, 140, 0.2); color: var(--mute); }
-  .c-upcoming { background: rgba(242, 184, 74, 0.14); color: var(--warn); }
-
-  /* tools */
-  .tools { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 16px; }
-  .tool { padding: 20px; }
-  .tool h3 { margin: 0 0 4px; font-size: 18px; }
-  .tool .sub { font-size: 14px; margin-bottom: 14px; }
-  label { display: block; font-size: 13px; font-weight: 600; color: var(--mute); margin: 0 0 6px; }
-  select, textarea, input[type="search"] { width: 100%; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font: 15px system-ui, sans-serif; min-height: 44px; }
-  select:focus, textarea:focus, input:focus { border-color: var(--lime); outline: none; }
-  textarea { font: 14px/1.45 var(--mono); resize: vertical; }
-  .btn { margin-top: 10px; background: var(--lime); color: #0a0d1f; border: 0; border-radius: 10px; padding: 10px 18px; font: 700 14px system-ui, sans-serif; min-height: 42px; cursor: pointer; transition: transform 150ms, box-shadow 150ms; }
-  .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(199, 242, 58, 0.18); }
-  .hint { color: var(--mute); font-size: 12px; margin: 12px 0 0; }
-  .answer { margin-top: 14px; background: var(--panel2); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; overflow-wrap: anywhere; }
-  .answer:empty { display: none; }
-  .answer p { margin: 0 0 8px; font-size: 15px; }
-  .answer p:last-child { margin-bottom: 0; }
-  .verdict { display: flex; align-items: center; gap: 10px; font-size: 19px !important; font-weight: 700; }
-  .a-yes { border-color: rgba(54, 208, 122, 0.45); }
-  .a-no, .a-not-yet, .a-unclear, .a-decoded { border-color: rgba(242, 184, 74, 0.4); }
-  .summary { font-weight: 600; }
-  .next { color: var(--mute); font-size: 13px !important; }
-  .next b { color: var(--ink); }
-
-  /* board */
-  .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
-  .controls input { flex: 1 1 220px; max-width: 320px; }
-  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
-  .chip { display: inline-flex; align-items: center; gap: 6px; background: transparent; color: var(--mute); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px 6px 8px; font: 600 13px system-ui, sans-serif; cursor: pointer; min-height: 36px; }
-  .chip .cell { width: 18px; height: 18px; font-size: 11px; border-radius: 5px; }
-  .chip[aria-pressed="true"] { color: var(--ink); border-color: var(--lime); }
-  .chip.all { padding-left: 12px; }
-  .board { overflow: hidden; }
-  .board-head, .r summary { display: grid; grid-template-columns: minmax(170px, 1.1fr) 120px minmax(0, 2.4fr) 92px; gap: 16px; align-items: start; padding: 12px 16px; }
-  .board-head { font-size: 12px; font-weight: 600; color: var(--mute); border-bottom: 1px solid var(--line); background: var(--panel2); }
-  .board-head span:last-child, .r .when { text-align: right; }
-  .r { border-bottom: 1px solid var(--line); }
-  .r:last-child { border-bottom: 0; }
-  .r summary { list-style: none; cursor: pointer; transition: background 150ms; }
-  .r summary::-webkit-details-marker { display: none; }
-  .r summary:hover { background: rgba(255, 255, 255, 0.02); }
-  .r[open] summary { background: var(--panel2); }
-  .r .name { font-weight: 600; }
-  .r .name small { display: block; color: var(--mute); font-weight: 400; font-size: 12px; }
-  .r .st { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
-  .r .note { font-size: 14px; color: #c9cdea; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .r[open] .note { display: block; -webkit-line-clamp: unset; }
-  .r .when { font-size: 12px; color: var(--mute); }
-  .r .when .more { display: block; color: var(--mute); }
-  .r .when .more::after { content: " +"; font-weight: 700; } .r[open] .when .more::after { content: " −"; }
-  .ev { margin: 0; padding: 4px 16px 16px; list-style: none; display: grid; gap: 6px; background: var(--panel2); }
-  .ev li { display: grid; grid-template-columns: 70px minmax(0, 1fr) auto; gap: 12px; font-size: 13px; color: var(--mute); padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
-  .ev .kind { font-size: 11px; font-weight: 700; color: var(--mute); text-transform: uppercase; letter-spacing: 0.04em; padding-top: 1px; }
-  .ev a { color: var(--ink); overflow-wrap: anywhere; }
-  .ev .what { display: block; }
-  .ev .d { white-space: nowrap; font-size: 12px; }
-  .empty { padding: 20px 16px; color: var(--mute); margin: 0; }
-  @media (max-width: 760px) {
-    .board-head { display: none; }
-    .r summary { grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; }
-    .r .name { grid-column: 1; } .r .st { grid-column: 2; grid-row: 1; justify-self: end; }
-    .r .note { grid-column: 1 / -1; } .r .when { grid-column: 1 / -1; text-align: left; }
-    .r .when .more { display: inline; margin-left: 8px; }
-    .ev li { grid-template-columns: minmax(0, 1fr); gap: 2px; }
-  }
-
-  /* deadlines + facts */
-  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 16px; list-style: none; padding: 0; margin: 0; }
-  .card { padding: 18px 20px; }
-  .card h3 { display: flex; align-items: center; gap: 10px; font-size: 16px; margin: 0 0 8px; }
-  .card h3 .tag { margin-left: auto; font-size: 12px; font-weight: 600; color: var(--mute); }
-  .card p { margin: 0 0 8px; font-size: 14px; color: #c9cdea; }
-  .card .links { font-size: 13px; color: var(--mute); margin: 0; }
-  .card .links a { color: var(--mute); }
-  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 12px; list-style: none; padding: 0; margin: 0; counter-reset: f; }
-  .facts li { padding: 16px; font-size: 14px; color: #c9cdea; counter-increment: f; }
-  .facts li::before { content: counter(f); display: inline-flex; width: 22px; height: 22px; align-items: center; justify-content: center; border-radius: 7px; background: rgba(199, 242, 58, 0.12); color: var(--lime); font-weight: 700; font-size: 12px; margin-bottom: 8px; }
-  .facts b { display: block; color: var(--ink); margin-bottom: 2px; }
-  .src { font-size: 13px; color: var(--mute); margin: 10px 0 0; }
-  .src a { color: var(--mute); }
-  .related { margin-top: 16px; padding: 16px 20px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; font-size: 14px; }
-  .related b { font-weight: 600; }
-  .related a.go { margin-left: auto; color: var(--lime); text-decoration: none; font-weight: 600; }
-  footer { margin: 48px 0 32px; color: var(--mute); font-size: 13px; border-top: 1px solid var(--line); padding-top: 16px; }
-  footer a { color: var(--mute); }
-  footer p { margin: 0 0 8px; }
-  .error { color: var(--warn); }
-  @media (max-width: 560px) { h1 { font-size: 22px; } .hero { padding-top: 24px; } }
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
-</style>
+<link rel="stylesheet" href="style.css?v=2">
 </head>
-<body>
+<body data-page="home">
 <header class="top">
   <div class="wrap">
-    <a class="logo" href="https://github.com/cryppit" aria-label="Cryppit">Crypp<b>it</b></a>
+    <a class="logo" href="./" aria-label="Cryppit NU7 readiness, overview">Crypp<b>it</b></a>
     <span class="crumb">NU7 readiness</span>
-    <nav aria-label="Sections">
-      <a href="#check">Check</a><a href="#board">Board</a><a href="#coming">Deadlines</a><a href="#changes">What changed</a>
-    </nav>
+    <span class="checked" id="top-checked"></span>
   </div>
+  <nav class="tabs" aria-label="Pages"><div class="wrap"><a href="./" aria-current="page">Overview</a><a href="check.html">Check your wallet</a><a href="board.html">Board</a><a href="deadlines.html">Deadlines</a><a href="changes.html">What changed</a></div></nav>
 </header>
-
 <main class="wrap">
-  <section class="hero">
-    <h1>Can your Zcash wallet send after NU7?</h1>
-    <p class="lede">NU7 went live on 6 November 2026 and the network now rejects version 4 transactions. This board tracks which wallets, libraries, bridges and swaps are ready, from public evidence only.</p>
-    <div class="stamps"><span class="stamp">Keyless · read-only</span><span class="stamp">Re-checked every hour</span><span class="stamp">No paid placement</span></div>
-  </section>
+  <div class="home">
+    <section class="hero">
+      <h1>Can your Zcash wallet send after NU7?</h1>
+      <p class="lede">NU7 went live on 6 November 2026 and the network now rejects version 4 transactions. We track which wallets, libraries, bridges and swaps are ready, from public evidence only, re-checked every hour.</p>
+      <div class="stamps"><span class="stamp">Keyless · read-only</span><span class="stamp">Re-checked every hour</span><span class="stamp">No paid placement</span></div>
+      <p class="cta"><a class="btn btn-link" href="check.html">Check my wallet</a></p>
+    </section>
+    <div class="wheel-box">
+      <div class="wheel" id="wheel" role="group" aria-label="Every tracked project, by status"></div>
+      <p class="w-tip" id="w-tip" aria-live="polite">Outer ring: ready. Inner ring: not ready yet. Hover or tap a project.</p>
+      <div class="w-key" id="w-key"></div>
+    </div>
+  </div>
 
   <section class="panel strip" aria-label="Network and board status">
     <div class="strip-head">
-      <span class="live" id="live"><i aria-hidden="true"></i><span id="live-text">Loading the latest check…</span></span>
+      <span class="live"><i aria-hidden="true"></i><span id="live-text">Loading the latest check…</span></span>
       <span class="facts-inline">Activated at block <b class="mono">3,543,405</b> · now <b class="mono" id="tip">…</b> · branch ID <b class="mono">0x77190AD9</b></span>
     </div>
     <div class="bar" id="bar" role="img" aria-label="Board status breakdown"></div>
@@ -199,66 +55,21 @@
     <div id="banners"></div>
   </section>
 
-  <h2 id="check">Check your wallet</h2>
-  <p class="sub">Both checks run in your browser. Nothing you choose or paste is sent anywhere.</p>
-  <div class="tools">
-    <section class="panel tool" aria-labelledby="send-title">
-      <h3 id="send-title">Can it send?</h3>
-      <p class="sub">Pick your wallet or app to get a yes, not yet or not clear, with what to do next.</p>
-      <label for="wallet">Your wallet or app</label>
-      <select id="wallet" disabled><option value="">Loading the latest check…</option></select>
-      <div id="answer" class="answer" aria-live="polite"></div>
-    </section>
-    <section class="panel tool" aria-labelledby="decode-title">
-      <h3 id="decode-title">What does my error mean?</h3>
-      <p class="sub">Paste the error your wallet or node showed.</p>
-      <label for="err">Error text</label>
-      <textarea id="err" rows="3" spellcheck="false" autocomplete="off" placeholder="transaction version 4 not supported by the network upgrade Nu7"></textarea>
-      <button type="button" class="btn" id="explain">Explain</button>
-      <div id="decoded" class="answer" aria-live="polite"></div>
-      <p class="hint">Never paste a recovery phrase or a private key into any page, this one included.</p>
-    </section>
-  </div>
-
-  <h2 id="board">The board</h2>
-  <p class="sub">Sorted so what's still broken comes first. Open a row for every piece of evidence behind its status.</p>
-  <div class="controls">
-    <input type="search" id="q" placeholder="Search a wallet, library or swap" aria-label="Search the board" autocomplete="off">
-    <div class="chips" role="group" aria-label="Filter by status" id="filters"></div>
-  </div>
-  <div class="panel board">
-    <div class="board-head" aria-hidden="true"><span>Project</span><span>Status</span><span>What's going on</span><span>Evidence</span></div>
-    <div id="rows"><p class="empty">Loading the latest check…</p></div>
-  </div>
-  <div class="tally" id="legend" style="margin-top:12px"></div>
-
-  <h2 id="coming">Coming up</h2>
-  <p class="sub">Dates that matter for anyone running Zcash infrastructure.</p>
-  <ul class="cards" id="deadlines"></ul>
-
-  <h2 id="changes">What NU7 changed</h2>
-  <p class="sub">For integrators. If you only use a wallet, the check above is all you need.</p>
-  <ol class="facts">
-    <li class="panel"><b>Version 4 transactions are rejected</b>Transparent-only ones included (ZIP 2003). Build v5 or v6.</li>
-    <li class="panel"><b>New branch ID <span class="mono">0x77190AD9</span></b>v5 and v6 signatures commit to it, so a signer with old constants fails even if it already builds v5.</li>
-    <li class="panel"><b>A block every 25 seconds</b>Down from 75 (ZIP 218). The same number of confirmations now takes a third of the time.</li>
-    <li class="panel"><b>Sprout funds are stuck</b>Sprout can only be spent in a v4 transaction, which is no longer valid.</li>
-  </ol>
-  <p class="src">Source: <a href="https://zips.z.cash/zip-0259">ZIP 259</a>. Zebra 7.0.0 is the node release that activated NU7.</p>
-
-  <div class="panel related">
-    <span><b>Withdrew ZEC from an exchange?</b> <span class="muted">See whether it landed shielded or transparent, and in which pool.</span></span>
-    <a class="go" href="https://cryppit.github.io/shield-receipt/">Shield Receipt →</a>
+  <div class="go-cards">
+    <a class="panel go-card" href="check.html"><b>Check your wallet</b><span>Pick your wallet for a yes, not yet or not clear, or paste the error it showed.</span><i>Open the check →</i></a>
+    <a class="panel go-card" href="board.html"><b>The board</b><span id="go-board">Every tracked project, with the evidence behind its status.</span><i>Open the board →</i></a>
+    <a class="panel go-card" href="deadlines.html"><b>Coming up</b><span>Zebra 7.0.0's built-in shutdown, and NU8.</span><i>See the dates →</i></a>
+    <a class="panel go-card" href="changes.html"><b>What NU7 changed</b><span>Four rule changes, in plain words, for integrators.</span><i>Read it →</i></a>
   </div>
 
   <footer>
     <p id="checked">Last checked: …</p>
     <p>What leaves your browser: one request for this board's own data file. The hourly checker reads public GitHub and the Blockchair explorer; this page reads nothing else and stores nothing.</p>
     <p>Rows and the rules behind each status are in <a href="https://github.com/cryppit/nu7-readiness">github.com/cryppit/nu7-readiness</a>. Corrections with public evidence are welcome as issues.</p>
-    <p>Run by <a href="https://github.com/cryppit">Cryppit</a>. Cryppit filed some of the linked items: shapeshift/web #12794 and vultisig-android #6115. Its grant request for the Vultisig/SwapKit swap path (ZCG #513) was withdrawn on 8 Nov, because Vultisig is doing that work itself. Project names belong to their owners.</p>
+    <p>Run by <a href="https://github.com/cryppit">Cryppit</a>. Cryppit filed some of the linked items: shapeshift/web #12794 and vultisig-android #6115. Its grant request for the Vultisig/SwapKit swap path (ZCG #513) was withdrawn on 8 Nov, because Vultisig is doing that work itself. Project names and marks belong to their owners; logo sources are listed in <a href="https://github.com/cryppit/nu7-readiness/blob/main/logos/LICENSE">logos/LICENSE</a>.</p>
   </footer>
 </main>
-<script src="nu7.js"></script>
-<script src="app.js"></script>
+<script src="nu7.js?v=2"></script>
+<script src="app.js?v=2"></script>
 </body>
 </html>

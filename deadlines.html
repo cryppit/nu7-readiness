@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
+<title>Coming up · NU7 readiness · Cryppit</title>
+<meta name="description" content="Upcoming Zcash deadlines: Zebra 7.0.0's built-in end of support and NU8.">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="NU7 readiness: can your Zcash wallet send?">
+<meta property="og:description" content="Which Zcash wallets, libraries, bridges and swaps are ready for NU7, from public evidence. Re-checked every hour, by Cryppit.">
+<meta property="og:url" content="https://cryppit.github.io/nu7-readiness/deadlines.html">
+<meta property="og:image" content="https://cryppit.github.io/nu7-readiness/icons/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#04061a">
+<link rel="stylesheet" href="style.css?v=2">
+</head>
+<body data-page="deadlines">
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="./" aria-label="Cryppit NU7 readiness, overview">Crypp<b>it</b></a>
+    <span class="crumb">NU7 readiness</span>
+    <span class="checked" id="top-checked"></span>
+  </div>
+  <nav class="tabs" aria-label="Pages"><div class="wrap"><a href="./">Overview</a><a href="check.html">Check your wallet</a><a href="board.html">Board</a><a href="deadlines.html" aria-current="page">Deadlines</a><a href="changes.html">What changed</a></div></nav>
+</header>
+<main class="wrap">
+  <section class="page-head">
+    <h1>Coming up</h1>
+    <p class="lede">Dates that matter for anyone running Zcash infrastructure, worked out from the code and the chain, not guessed.</p>
+  </section>
+  <ul class="cards" id="deadlines" data-gap></ul>
+
+  <footer>
+    <p id="checked">Last checked: …</p>
+    <p>What leaves your browser: one request for this board's own data file. The hourly checker reads public GitHub and the Blockchair explorer; this page reads nothing else and stores nothing.</p>
+    <p>Rows and the rules behind each status are in <a href="https://github.com/cryppit/nu7-readiness">github.com/cryppit/nu7-readiness</a>. Corrections with public evidence are welcome as issues.</p>
+    <p>Run by <a href="https://github.com/cryppit">Cryppit</a>. Cryppit filed some of the linked items: shapeshift/web #12794 and vultisig-android #6115. Its grant request for the Vultisig/SwapKit swap path (ZCG #513) was withdrawn on 8 Nov, because Vultisig is doing that work itself. Project names and marks belong to their owners; logo sources are listed in <a href="https://github.com/cryppit/nu7-readiness/blob/main/logos/LICENSE">logos/LICENSE</a>.</p>
+  </footer>
+</main>
+<script src="nu7.js?v=2"></script>
+<script src="app.js?v=2"></script>
+</body>
+</html>
