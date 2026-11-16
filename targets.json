@@ -422,6 +422,40 @@
     {"kind": "fix", "ref": "ZelCore-io/bitgo-utxo-lib-ts#9"},
     {"kind": "code", "ref": "ZelCore-io/bitgo-utxo-lib-ts:src/bitgo/zcash/ZcashTransaction.ts", "pattern": "NU7_BRANCH_ID = 0x77190ad9", "means": "fixed", "label": "NU7 branch ID present"}
    ]
+  },
+  {
+   "id": "ssp-wallet",
+   "name": "SSP Wallet (Flux)",
+   "category": "Wallet",
+   "note": "Flux's two-device wallet. SSP Wallet 2.2.2 (10 Nov) builds and signs v5 ZEC transactions (ZIP 225 and ZIP 244), and SSP Key 2.2.3 (10 Nov) co-signs them; the release notes say Zcash sends work again with both apps updated. The relay moved to the NU7 v5 config the same day.",
+   "user": {"label": "SSP Wallet (Flux)", "update": "SSP Wallet 2.2.2 and SSP Key 2.2.3 or later (both apps)"},
+   "signals": [
+    {"kind": "release", "ref": "RunOnFlux/ssp-wallet@v2.2.2", "label": "Zcash sends work again (v5)"},
+    {"kind": "release", "ref": "RunOnFlux/ssp-key@v2.2.3", "label": "Co-signs v5 ZEC transactions"},
+    {"kind": "fix", "ref": "RunOnFlux/ssp-wallet#758"},
+    {"kind": "fix", "ref": "RunOnFlux/ssp-key#116"},
+    {"kind": "context", "ref": "RunOnFlux/ssp-relay#109", "label": "Relay: NU7 v5 config"}
+   ]
+  },
+  {
+   "id": "nozy-wallet",
+   "name": "NozyWallet",
+   "category": "Wallet",
+   "note": "Orchard and Ironwood wallet built on Zebra. The NU7 branch ID 0x77190AD9 was stamped on 6 Nov (#342) and is in browser extension 2.0.4 (13 Nov). Not tested by us.",
+   "user": {"label": "NozyWallet (browser extension)", "update": "extension 2.0.4 or later"},
+   "signals": [
+    {"kind": "release", "ref": "LEONINE-DAO/Nozy-wallet@extension-v2.0.4"},
+    {"kind": "fix", "ref": "LEONINE-DAO/Nozy-wallet#342"}
+   ]
+  },
+  {
+   "id": "gleec-kdf",
+   "name": "GLEEC coin config (Komodo DeFi Framework)",
+   "category": "Wallet SDK",
+   "note": "The ZEC entry in GLEEC's coin list still builds v4 transactions. A pull request moves it to v5 with the NU7 branch ID and 25-second blocks (#2133, open), but it says it needs a Komodo DeFi Framework build with v5 support, and no NU7 branch ID was found in the framework's source on 16 Nov.",
+   "signals": [
+    {"kind": "fix", "ref": "GLEECBTC/coins#2133", "label": "ZEC to v5 for NU7 (needs a KDF build with v5 support)"}
+   ]
   }
  ]
 }
