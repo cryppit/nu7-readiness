@@ -202,3 +202,11 @@
   .cta { margin: 22px 0 0; }
   .btn-link { display: inline-block; margin-top: 0; text-decoration: none; color: #0a0d1f; }
   .btn-link:hover { color: #0a0d1f; }
+  .changes { margin-top: 16px; }
+  .chg-head { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: baseline; justify-content: space-between; }
+  .chg-head h2 { margin: 0; font-size: 17px; }
+  .chg-head .feed { font-size: 13px; color: var(--mute); }
+  .chg { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 6px; }
+  .chg li { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; font-size: 14px; }
+  .chg .d { flex: none; width: 52px; color: var(--mute); font-size: 13px; }
+  .chg .to { color: var(--mute); }

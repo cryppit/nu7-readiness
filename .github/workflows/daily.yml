@@ -1,0 +1,54 @@
+# Once a day: re-check every row, save the day's snapshot to history/ (the commit also keeps GitHub's scheduler from
+# switching itself off after 60 quiet days), open an issue listing new public NU7 items for a person to review, run the
+# watchdog, then ask "Check and publish" to redeploy the page with the new change log. It never changes a row's status.
+name: Daily snapshot, scan and watchdog
+
+on:
+  schedule:
+    - cron: "41 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  actions: write
+
+concurrency:
+  group: daily
+  cancel-in-progress: false
+
+jobs:
+  daily:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python3 -m unittest -v test_check test_daily
+      - run: python3 check.py --out data/status.json
+      - name: Watchdog (before today's snapshot, so it compares with yesterday's)
+        run: python3 daily.py watchdog --status data/status.json --dir history --repo "$GITHUB_REPOSITORY"
+      - run: python3 daily.py snapshot --status data/status.json --dir history
+      - name: Discovery scan
+        run: python3 daily.py discover --repo "$GITHUB_REPOSITORY"
+      - name: Commit the snapshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add history
+          git diff --cached --quiet && exit 0
+          git commit -m "Daily snapshot $(date -u +%F)"
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - name: Keep both schedules switched on, redeploy the page
+        run: |
+          gh workflow enable pages.yml
+          gh workflow enable daily.yml
+          gh workflow run pages.yml --ref main
+      - name: Report a failed run
+        if: failure()
+        run: python3 daily.py watchdog --failed "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY"

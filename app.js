@@ -214,6 +214,30 @@ function openFromHash() {
   if (d && d.tagName === "DETAILS") { d.open = true; d.scrollIntoView(); }
 }
 
+function changesList() {
+  const box = $("changes");
+  if (!box) return;
+  const say = (t) => box.replaceChildren(el("li", { class: "muted" }, t));
+  fetch("data/changes.json", { cache: "no-store" })
+    .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+    .then((c) => {
+      const evs = c.events.slice(0, 10);
+      if (!evs.length) { say(`No row has changed status since the daily snapshots began on ${short(c.since)}.`); return; }
+      const name = (e) => (e.to ? el("a", { href: `board.html#${encodeURIComponent(e.id)}` }, e.name) : e.name);
+      const st = (s) => [el("span", {}, cell(s), ` ${LABEL[s] || s}`)];
+      box.replaceChildren(...evs.map((e) => {
+        const li = el("li", {}, el("span", { class: "d" }, short(e.date)), el("span", {}, name(e), ":"));
+        if (!e.from) li.append("added as", ...st(e.to));
+        else if (!e.to) li.append("removed, was", ...st(e.from));
+        else li.append(...st(e.from), el("span", { class: "to", "aria-label": "to" }, "→"), ...st(e.to));
+        return li;
+      }));
+      $("chg-note").textContent = `A snapshot of every row is saved once a day, since ${short(c.since)}. Showing the latest ${evs.length} of ${c.events.length} changes.`;
+    })
+    .catch(() => say("The change log is not available right now. It starts with the first daily snapshot."));
+}
+changesList();
+
 fetch("data/status.json", { cache: "no-store" })
   .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
   .then((d) => { data = d; strip(); wheel(); filters(); render(); sendCheck(); deadlinesList(d.chain, d.checked_at); openFromHash(); })

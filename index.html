@@ -19,7 +19,8 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#04061a">
-<link rel="stylesheet" href="style.css?v=2">
+<link rel="alternate" type="application/atom+xml" title="NU7 readiness: status changes" href="feed.xml">
+<link rel="stylesheet" href="style.css?v=3">
 </head>
 <body data-page="home">
 <header class="top">
@@ -55,6 +56,12 @@
     <div id="banners"></div>
   </section>
 
+  <section class="panel changes" aria-labelledby="chg-h">
+    <div class="chg-head"><h2 id="chg-h">Status changes, day by day</h2><a class="feed" href="feed.xml">Follow the feed (Atom)</a></div>
+    <ol class="chg" id="changes"><li class="muted">Loading…</li></ol>
+    <p class="hint" id="chg-note">A snapshot of every row is saved once a day; this list compares each day with the one before.</p>
+  </section>
+
   <div class="go-cards">
     <a class="panel go-card" href="check.html"><b>Check your wallet</b><span>Pick your wallet for a yes, not yet or not clear, or paste the error it showed.</span><i>Open the check →</i></a>
     <a class="panel go-card" href="board.html"><b>The board</b><span id="go-board">Every tracked project, with the evidence behind its status.</span><i>Open the board →</i></a>
@@ -64,12 +71,12 @@
 
   <footer>
     <p id="checked">Last checked: …</p>
-    <p>What leaves your browser: one request for this board's own data file. The automatic checker reads public GitHub and the Blockchair explorer; this page reads nothing else and stores nothing.</p>
+    <p>What leaves your browser: two requests for this board's own data files. The automatic checker reads public GitHub and the Blockchair explorer; this page reads nothing else and stores nothing.</p>
     <p>Rows and the rules behind each status are in <a href="https://github.com/cryppit/nu7-readiness">github.com/cryppit/nu7-readiness</a>. Corrections with public evidence are welcome as issues.</p>
     <p>Run by <a href="https://github.com/cryppit">Cryppit</a>. Cryppit filed some of the linked items: shapeshift/web #12794 and vultisig-android #6115. Its grant request for the Vultisig/SwapKit swap path (ZCG #513) was withdrawn on 8 Nov, because Vultisig is doing that work itself. Project names and marks belong to their owners; logo sources are listed in <a href="https://github.com/cryppit/nu7-readiness/blob/main/logos/LICENSE">logos/LICENSE</a>.</p>
   </footer>
 </main>
 <script src="nu7.js?v=2"></script>
-<script src="app.js?v=2"></script>
+<script src="app.js?v=3"></script>
 </body>
 </html>

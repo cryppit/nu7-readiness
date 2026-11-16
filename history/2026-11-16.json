@@ -1,0 +1,166 @@
+{
+ "date": "2026-11-16",
+ "checked_at": "2026-11-16T08:07:30Z",
+ "tip": 3578545,
+ "counts": {
+  "fixed": 25,
+  "in-review": 3,
+  "broken": 5,
+  "watch": 5,
+  "unknown": 0
+ },
+ "rows": {
+  "trust-wallet-core": {
+   "status": "fixed",
+   "name": "Trust Wallet Core"
+  },
+  "trust-wallet-extension": {
+   "status": "broken",
+   "name": "Trust Wallet browser extension"
+  },
+  "vultisig-swapkit": {
+   "status": "fixed",
+   "name": "Vultisig: SwapKit ZEC swaps"
+  },
+  "swapkit-trezor": {
+   "status": "fixed",
+   "name": "SwapKit: Trezor ZEC signing"
+  },
+  "zaino": {
+   "status": "in-review",
+   "name": "Zaino (light-wallet indexer)"
+  },
+  "trezor-suite": {
+   "status": "fixed",
+   "name": "Trezor Suite and Blockbook (ZEC)"
+  },
+  "trezor-firmware": {
+   "status": "watch",
+   "name": "Trezor firmware: v4 signing cleanup"
+  },
+  "zondax-ledger": {
+   "status": "watch",
+   "name": "Zondax Ledger app (ledger-zcash)"
+  },
+  "noir": {
+   "status": "fixed",
+   "name": "Noir Wallet"
+  },
+  "zingolib": {
+   "status": "fixed",
+   "name": "Zingo (zingolib)"
+  },
+  "zodl-android": {
+   "status": "fixed",
+   "name": "Zodl Android SDK"
+  },
+  "edge": {
+   "status": "fixed",
+   "name": "Edge"
+  },
+  "zapp": {
+   "status": "in-review",
+   "name": "Zapp (iOS SDK fork)"
+  },
+  "webzjs": {
+   "status": "in-review",
+   "name": "WebZjs (MetaMask Snap)"
+  },
+  "zns": {
+   "status": "fixed",
+   "name": "ZNS mint"
+  },
+  "omni-zec": {
+   "status": "fixed",
+   "name": "NEAR Omni Bridge: ZEC"
+  },
+  "thorchain": {
+   "status": "fixed",
+   "name": "THORChain ZEC"
+  },
+  "maya": {
+   "status": "fixed",
+   "name": "Maya Protocol ZEC"
+  },
+  "mining-infra": {
+   "status": "broken",
+   "name": "sovright mining-infra"
+  },
+  "bitgo": {
+   "status": "fixed",
+   "name": "BitGo (wasm-utxo)"
+  },
+  "valar-fork": {
+   "status": "watch",
+   "name": "Valar librustzcash fork: early NU7 ID PR"
+  },
+  "librustzcash": {
+   "status": "fixed",
+   "name": "librustzcash crates"
+  },
+  "zebra": {
+   "status": "fixed",
+   "name": "Zebra node"
+  },
+  "keystone": {
+   "status": "fixed",
+   "name": "Keystone 3 firmware"
+  },
+  "keepkey": {
+   "status": "broken",
+   "name": "KeepKey firmware"
+  },
+  "unstoppable": {
+   "status": "fixed",
+   "name": "Unstoppable Wallet (Android)"
+  },
+  "unstoppable-ios": {
+   "status": "fixed",
+   "name": "Unstoppable Wallet (iOS)"
+  },
+  "zodl-ios": {
+   "status": "fixed",
+   "name": "Zodl iOS (Swift SDK)"
+  },
+  "mit-sdks": {
+   "status": "broken",
+   "name": "Zcash Android and Swift SDKs (original, MIT)"
+  },
+  "shapeshift": {
+   "status": "fixed",
+   "name": "ShapeShift"
+  },
+  "gem-wallet": {
+   "status": "fixed",
+   "name": "Gem Wallet"
+  },
+  "konclave": {
+   "status": "fixed",
+   "name": "Konclave (FROST group vault)"
+  },
+  "zallet": {
+   "status": "fixed",
+   "name": "Zallet (zcashd wallet replacement)"
+  },
+  "ledger-live": {
+   "status": "fixed",
+   "name": "Ledger Live"
+  },
+  "ledger-hw-app-btc": {
+   "status": "broken",
+   "name": "Ledger hw-app-btc (JS library)"
+  },
+  "near-omni-tx": {
+   "status": "watch",
+   "name": "NEAR omni-transaction-rs"
+  },
+  "defuse-utxo-lib": {
+   "status": "watch",
+   "name": "Defuse Labs utxo-lib"
+  },
+  "zelcore-utxo-lib": {
+   "status": "fixed",
+   "name": "ZelCore utxo-lib"
+  }
+ }
+}
