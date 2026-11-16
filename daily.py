@@ -191,10 +191,10 @@ def health(status: dict, prev: dict | None, live_checked_at: str | None, now: dt
 
 # ---------- I/O ----------
 
-def http(method: str, url: str, body: Any = None) -> Any:
+def http(method: str, url: str, body: Any = None, auth: bool = True) -> Any:
     headers = {"User-Agent": UA, "Accept": "application/vnd.github+json" if "api.github.com" in url else "application/json"}
     token = os.environ.get("GITHUB_TOKEN")
-    if token and url.startswith("https://api.github.com/"):
+    if auth and token and url.startswith("https://api.github.com/"):
         headers["Authorization"] = f"Bearer {token}"
     data = None
     if body is not None:
@@ -262,7 +262,10 @@ def cmd_discover(argv: list[str]) -> int:
     items = []
     for q in QUERIES:
         query = urllib.parse.quote(f"{q} created:>={since}")
-        items += gh("GET", f"search/issues?q={query}&sort=created&order=desc&per_page=50")["items"]
+        # Anonymous on purpose: with the Actions token, GitHub's search leaves out pull requests from other repos.
+        # Five queries a day are well inside the anonymous search limit (10 a minute).
+        items += http("GET", f"https://api.github.com/search/issues?q={query}&sort=created&order=desc&per_page=50",
+                      auth=False)["items"]
     cands = candidates(items, targets, set(seen))
     print(f"{len(items)} search hits, {len(cands)} new")
     if not cands:
