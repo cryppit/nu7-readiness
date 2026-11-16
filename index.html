@@ -3,14 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NU7 readiness</title>
-<meta name="description" content="Which Zcash wallets, libraries, bridges and swaps are ready for NU7, from public evidence. Read-only, re-checked several times a day.">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'">
+<title>NU7 readiness · Cryppit</title>
+<meta name="description" content="Can your Zcash wallet send after NU7? Which wallets, libraries, bridges and swaps are ready, from public evidence, re-checked every hour. Keyless and read-only.">
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta property="og:type" content="website">
-<meta property="og:title" content="NU7 readiness: is your Zcash wallet ready?">
-<meta property="og:description" content="Which Zcash wallets, libraries, bridges and swaps are ready for NU7, from public evidence. Re-checked several times a day, by Cryppit.">
+<meta property="og:title" content="NU7 readiness: can your Zcash wallet send?">
+<meta property="og:description" content="Which Zcash wallets, libraries, bridges and swaps are ready for NU7, from public evidence. Re-checked every hour, by Cryppit.">
 <meta property="og:url" content="https://cryppit.github.io/nu7-readiness/">
 <meta property="og:image" content="https://cryppit.github.io/nu7-readiness/icons/og.png">
 <meta property="og:image:width" content="1200">
@@ -19,270 +21,244 @@
 <meta name="theme-color" content="#04061a">
 <style>
   :root {
-    --bg: #070b22; --deep: #04061a; --panel: #0c1236; --line: rgba(154, 163, 199, 0.2);
-    --ink: #f4f1e8; --mute: #9aa3c7; --lime: #ddf24a; --amber: #ffb547; --red: #ff6b6b; --blue: #8fb4ff;
+    --bg: #04061a; --panel: #0b1030; --panel2: #0e1438; --ink: #eef1ff; --mute: #8c93c0; --line: #1b2250; --lime: #c7f23a;
+    --yes: #36d07a; --no: #5a608c; --unknown: #8c93c0; --warn: #f2b84a;
     --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; background: radial-gradient(1100px 600px at 80% -10%, rgba(42, 59, 214, 0.28), transparent 60%), var(--deep); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
-  a { color: var(--lime); }
-  main { max-width: 1040px; margin: 0 auto; padding: 40px 16px 64px; }
-  .kicker { font: 600 13px/1 var(--mono); letter-spacing: 0.18em; text-transform: uppercase; color: var(--mute); margin: 0 0 12px; }
-  h1 { font-size: clamp(30px, 6vw, 46px); line-height: 1.1; margin: 0 0 12px; }
-  h2 { font-size: 20px; margin: 40px 0 12px; }
-  .lead { color: var(--mute); max-width: 720px; margin: 0 0 24px; }
+  html { scroll-padding-top: 64px; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  a { color: var(--ink); text-decoration-color: var(--line); text-underline-offset: 3px; }
+  a:hover { color: var(--lime); text-decoration-color: var(--lime); }
+  :focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; border-radius: 6px; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
   .mono { font-family: var(--mono); }
-  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
-  .clock { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 16px; }
-  .clock div span { display: block; font: 600 12px var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--mute); }
-  .clock div strong { font: 700 22px var(--mono); }
-  .banner { border-radius: 12px; padding: 12px 16px; margin: 16px 0 0; font-size: 15px; }
-  .banner.stale { background: rgba(255, 181, 71, 0.12); border: 1px solid var(--amber); color: var(--amber); }
-  .banner.active { background: rgba(221, 242, 74, 0.1); border: 1px solid var(--lime); color: var(--lime); }
-  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0 16px; }
-  .filters button { background: transparent; color: var(--ink); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; font: 600 14px system-ui, sans-serif; cursor: pointer; min-height: 40px; }
-  .filters button[aria-pressed="true"] { border-color: var(--lime); color: var(--lime); }
-  .rows { display: grid; gap: 12px; }
-  .row { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; }
-  .row header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 12px; }
-  .row h3 { font-size: 18px; margin: 0; }
-  .cat { color: var(--mute); font: 13px var(--mono); }
-  .pill { margin-left: auto; font: 700 12px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; border-radius: 999px; padding: 4px 10px; border: 1px solid; white-space: nowrap; }
-  .s-fixed { color: var(--lime); border-color: var(--lime); }
-  .s-in-review { color: var(--blue); border-color: var(--blue); }
-  .s-broken { color: var(--red); border-color: var(--red); }
-  .s-watch { color: var(--amber); border-color: var(--amber); }
-  .s-unknown { color: var(--mute); border-color: var(--mute); }
-  .row p { margin: 10px 0 8px; color: var(--ink); }
-  .row ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
-  .row li { font-size: 14px; color: var(--mute); overflow-wrap: anywhere; }
-  .row li b { font: 600 12px var(--mono); letter-spacing: 0.04em; text-transform: uppercase; margin-right: 6px; color: var(--ink); }
-  .legend { display: grid; gap: 8px; padding: 0; list-style: none; }
-  .legend li { display: flex; gap: 10px; align-items: baseline; }
-  .legend .pill { margin-left: 0; }
-  ol.facts { padding-left: 20px; }
-  ol.facts li { margin-bottom: 6px; }
-  footer { margin-top: 48px; color: var(--mute); font-size: 14px; border-top: 1px solid var(--line); padding-top: 20px; }
-  .error { color: var(--red); }
-  .tools { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 16px; margin-top: 24px; }
-  .tool h2 { margin: 0 0 12px; }
-  .tool label { display: block; font: 600 12px var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--mute); margin: 0 0 8px; }
-  .tool select, .tool textarea { width: 100%; background: var(--deep); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font: 15px system-ui, sans-serif; min-height: 44px; }
-  .tool textarea { font: 14px/1.45 var(--mono); resize: vertical; }
-  .tool button { margin-top: 10px; background: transparent; color: var(--lime); border: 1px solid var(--lime); border-radius: 999px; padding: 8px 16px; font: 600 14px system-ui, sans-serif; min-height: 40px; cursor: pointer; }
-  .answer { margin-top: 14px; border-left: 3px solid var(--line); padding-left: 12px; overflow-wrap: anywhere; }
+  .muted { color: var(--mute); }
+
+  /* header */
+  .top { position: sticky; top: 0; z-index: 5; background: rgba(4, 6, 26, 0.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  .top .wrap { display: flex; align-items: center; gap: 16px; height: 52px; }
+  .logo { font-weight: 800; letter-spacing: 0.3px; text-decoration: none; }
+  .logo b { color: var(--lime); }
+  .crumb { color: var(--mute); font-size: 14px; }
+  .top nav { margin-left: auto; display: flex; gap: 4px; }
+  .top nav a { color: var(--mute); text-decoration: none; font-size: 14px; padding: 6px 10px; border-radius: 8px; }
+  .top nav a:hover { color: var(--ink); background: var(--panel); }
+  @media (max-width: 640px) { .top nav { display: none; } }
+
+  /* hero */
+  .hero { padding: 36px 0 8px; }
+  h1 { font-size: 28px; line-height: 1.2; margin: 0 0 8px; }
+  .lede { color: var(--mute); max-width: 680px; margin: 0 0 14px; }
+  .stamps { display: flex; flex-wrap: wrap; gap: 8px; }
+  .stamp { font-size: 12px; color: var(--lime); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; }
+  h2 { font-size: 20px; margin: 44px 0 6px; }
+  .sub { color: var(--mute); margin: 0 0 16px; font-size: 15px; }
+
+  /* status strip */
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; }
+  .strip { margin-top: 24px; padding: 18px 20px; display: grid; gap: 16px; }
+  .strip-head { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: baseline; }
+  .live { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
+  .live i { width: 8px; height: 8px; border-radius: 50%; background: var(--yes); box-shadow: 0 0 0 3px rgba(54, 208, 122, 0.18); }
+  .facts-inline { color: var(--mute); font-size: 14px; }
+  .facts-inline b { color: var(--ink); font-weight: 600; }
+  .bar { display: flex; height: 10px; border-radius: 999px; overflow: hidden; background: var(--line); }
+  .bar span { display: block; height: 100%; }
+  .bar .b-fixed { background: var(--yes); } .bar .b-in-review { background: rgba(54, 208, 122, 0.45); }
+  .bar .b-watch { background: var(--warn); } .bar .b-broken { background: #c6cbea; } .bar .b-unknown { background: var(--no); }
+  .tally { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; color: var(--mute); }
+  .tally span { display: inline-flex; align-items: center; gap: 6px; }
+  .tally b { color: var(--ink); }
+  .banner { margin: 0; border-radius: 10px; padding: 10px 14px; font-size: 14px; background: rgba(242, 184, 74, 0.08); border: 1px solid rgba(242, 184, 74, 0.4); color: var(--warn); }
+
+  /* verdict cells */
+  .cell { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 22px; height: 22px; border-radius: 7px; font: 700 13px/1 system-ui, sans-serif; }
+  .c-fixed { background: rgba(54, 208, 122, 0.15); color: var(--yes); }
+  .c-in-review { background: rgba(54, 208, 122, 0.08); color: rgba(54, 208, 122, 0.85); box-shadow: inset 0 0 0 1px rgba(54, 208, 122, 0.35); }
+  .c-watch { background: rgba(242, 184, 74, 0.14); color: var(--warn); }
+  .c-broken { background: rgba(198, 203, 234, 0.12); color: #e4e7fb; box-shadow: inset 0 0 0 1px rgba(198, 203, 234, 0.35); }
+  .c-unknown, .c-proposed, .c-passed { background: rgba(90, 96, 140, 0.2); color: var(--mute); }
+  .c-upcoming { background: rgba(242, 184, 74, 0.14); color: var(--warn); }
+
+  /* tools */
+  .tools { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 16px; }
+  .tool { padding: 20px; }
+  .tool h3 { margin: 0 0 4px; font-size: 18px; }
+  .tool .sub { font-size: 14px; margin-bottom: 14px; }
+  label { display: block; font-size: 13px; font-weight: 600; color: var(--mute); margin: 0 0 6px; }
+  select, textarea, input[type="search"] { width: 100%; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font: 15px system-ui, sans-serif; min-height: 44px; }
+  select:focus, textarea:focus, input:focus { border-color: var(--lime); outline: none; }
+  textarea { font: 14px/1.45 var(--mono); resize: vertical; }
+  .btn { margin-top: 10px; background: var(--lime); color: #0a0d1f; border: 0; border-radius: 10px; padding: 10px 18px; font: 700 14px system-ui, sans-serif; min-height: 42px; cursor: pointer; transition: transform 150ms, box-shadow 150ms; }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(199, 242, 58, 0.18); }
+  .hint { color: var(--mute); font-size: 12px; margin: 12px 0 0; }
+  .answer { margin-top: 14px; background: var(--panel2); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; overflow-wrap: anywhere; }
   .answer:empty { display: none; }
-  .answer p { margin: 0 0 8px; }
-  .verdict { font: 700 20px var(--mono); }
-  .a-yes { border-color: var(--lime); } .a-yes .verdict { color: var(--lime); }
-  .a-not-yet, .a-no { border-color: var(--red); } .a-not-yet .verdict, .a-no .verdict { color: var(--red); }
-  .a-unclear, .a-decoded { border-color: var(--amber); } .a-unclear .verdict, .a-decoded .verdict { color: var(--amber); }
-  .a-unknown .verdict { color: var(--mute); }
-  .answer .verdict + p, .a-decoded .verdict { font-weight: 600; }
-  .hint { color: var(--mute); font-size: 13px; margin: 12px 0 0; }
-  .deadlines { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
-  .deadlines li { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px 18px; }
-  .deadlines h3 { font-size: 17px; margin: 0; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: baseline; }
-  .deadlines p { margin: 8px 0 0; }
-  .deadlines .links { font-size: 14px; color: var(--mute); }
-  .s-upcoming { color: var(--amber); border-color: var(--amber); }
-  .s-proposed, .s-passed { color: var(--mute); border-color: var(--mute); }
+  .answer p { margin: 0 0 8px; font-size: 15px; }
+  .answer p:last-child { margin-bottom: 0; }
+  .verdict { display: flex; align-items: center; gap: 10px; font-size: 19px !important; font-weight: 700; }
+  .a-yes { border-color: rgba(54, 208, 122, 0.45); }
+  .a-no, .a-not-yet, .a-unclear, .a-decoded { border-color: rgba(242, 184, 74, 0.4); }
+  .summary { font-weight: 600; }
+  .next { color: var(--mute); font-size: 13px !important; }
+  .next b { color: var(--ink); }
+
+  /* board */
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+  .controls input { flex: 1 1 220px; max-width: 320px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; background: transparent; color: var(--mute); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px 6px 8px; font: 600 13px system-ui, sans-serif; cursor: pointer; min-height: 36px; }
+  .chip .cell { width: 18px; height: 18px; font-size: 11px; border-radius: 5px; }
+  .chip[aria-pressed="true"] { color: var(--ink); border-color: var(--lime); }
+  .chip.all { padding-left: 12px; }
+  .board { overflow: hidden; }
+  .board-head, .r summary { display: grid; grid-template-columns: minmax(170px, 1.1fr) 120px minmax(0, 2.4fr) 92px; gap: 16px; align-items: start; padding: 12px 16px; }
+  .board-head { font-size: 12px; font-weight: 600; color: var(--mute); border-bottom: 1px solid var(--line); background: var(--panel2); }
+  .board-head span:last-child, .r .when { text-align: right; }
+  .r { border-bottom: 1px solid var(--line); }
+  .r:last-child { border-bottom: 0; }
+  .r summary { list-style: none; cursor: pointer; transition: background 150ms; }
+  .r summary::-webkit-details-marker { display: none; }
+  .r summary:hover { background: rgba(255, 255, 255, 0.02); }
+  .r[open] summary { background: var(--panel2); }
+  .r .name { font-weight: 600; }
+  .r .name small { display: block; color: var(--mute); font-weight: 400; font-size: 12px; }
+  .r .st { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
+  .r .note { font-size: 14px; color: #c9cdea; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .r[open] .note { display: block; -webkit-line-clamp: unset; }
+  .r .when { font-size: 12px; color: var(--mute); }
+  .r .when .more { display: block; color: var(--mute); }
+  .r .when .more::after { content: " +"; font-weight: 700; } .r[open] .when .more::after { content: " −"; }
+  .ev { margin: 0; padding: 4px 16px 16px; list-style: none; display: grid; gap: 6px; background: var(--panel2); }
+  .ev li { display: grid; grid-template-columns: 70px minmax(0, 1fr) auto; gap: 12px; font-size: 13px; color: var(--mute); padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+  .ev .kind { font-size: 11px; font-weight: 700; color: var(--mute); text-transform: uppercase; letter-spacing: 0.04em; padding-top: 1px; }
+  .ev a { color: var(--ink); overflow-wrap: anywhere; }
+  .ev .what { display: block; }
+  .ev .d { white-space: nowrap; font-size: 12px; }
+  .empty { padding: 20px 16px; color: var(--mute); margin: 0; }
+  @media (max-width: 760px) {
+    .board-head { display: none; }
+    .r summary { grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; }
+    .r .name { grid-column: 1; } .r .st { grid-column: 2; grid-row: 1; justify-self: end; }
+    .r .note { grid-column: 1 / -1; } .r .when { grid-column: 1 / -1; text-align: left; }
+    .r .when .more { display: inline; margin-left: 8px; }
+    .ev li { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  }
+
+  /* deadlines + facts */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 16px; list-style: none; padding: 0; margin: 0; }
+  .card { padding: 18px 20px; }
+  .card h3 { display: flex; align-items: center; gap: 10px; font-size: 16px; margin: 0 0 8px; }
+  .card h3 .tag { margin-left: auto; font-size: 12px; font-weight: 600; color: var(--mute); }
+  .card p { margin: 0 0 8px; font-size: 14px; color: #c9cdea; }
+  .card .links { font-size: 13px; color: var(--mute); margin: 0; }
+  .card .links a { color: var(--mute); }
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 12px; list-style: none; padding: 0; margin: 0; counter-reset: f; }
+  .facts li { padding: 16px; font-size: 14px; color: #c9cdea; counter-increment: f; }
+  .facts li::before { content: counter(f); display: inline-flex; width: 22px; height: 22px; align-items: center; justify-content: center; border-radius: 7px; background: rgba(199, 242, 58, 0.12); color: var(--lime); font-weight: 700; font-size: 12px; margin-bottom: 8px; }
+  .facts b { display: block; color: var(--ink); margin-bottom: 2px; }
+  .src { font-size: 13px; color: var(--mute); margin: 10px 0 0; }
+  .src a { color: var(--mute); }
+  .related { margin-top: 16px; padding: 16px 20px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; font-size: 14px; }
+  .related b { font-weight: 600; }
+  .related a.go { margin-left: auto; color: var(--lime); text-decoration: none; font-weight: 600; }
+  footer { margin: 48px 0 32px; color: var(--mute); font-size: 13px; border-top: 1px solid var(--line); padding-top: 16px; }
+  footer a { color: var(--mute); }
+  footer p { margin: 0 0 8px; }
+  .error { color: var(--warn); }
+  @media (max-width: 560px) { h1 { font-size: 22px; } .hero { padding-top: 24px; } }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body>
-<main>
-  <p class="kicker">Zcash · NU7 · read-only</p>
-  <h1>Who is ready for NU7?</h1>
-  <p class="lead">NU7 activated on Mainnet on 6 November 2026. Every version 4 Zcash transaction is now invalid and signers need the new consensus branch ID
-    <span class="mono">0x77190AD9</span>. This board tracks wallets, libraries, bridges and swaps from public evidence:
-    GitHub issues, pull requests, releases and source code, re-checked several times a day; the time of the last check is shown.</p>
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="https://github.com/cryppit" aria-label="Cryppit">Crypp<b>it</b></a>
+    <span class="crumb">NU7 readiness</span>
+    <nav aria-label="Sections">
+      <a href="#check">Check</a><a href="#board">Board</a><a href="#coming">Deadlines</a><a href="#changes">What changed</a>
+    </nav>
+  </div>
+</header>
 
-  <section class="panel" aria-label="Activation status">
-    <div class="clock">
-      <div><span>Activation height</span><strong class="mono">3,543,405</strong></div>
-      <div><span>Current height</span><strong id="tip">…</strong></div>
-      <div><span>Blocks to go</span><strong id="left">…</strong></div>
-      <div><span>Estimated time (UTC)</span><strong id="eta">…</strong></div>
+<main class="wrap">
+  <section class="hero">
+    <h1>Can your Zcash wallet send after NU7?</h1>
+    <p class="lede">NU7 went live on 6 November 2026 and the network now rejects version 4 transactions. This board tracks which wallets, libraries, bridges and swaps are ready, from public evidence only.</p>
+    <div class="stamps"><span class="stamp">Keyless · read-only</span><span class="stamp">Re-checked every hour</span><span class="stamp">No paid placement</span></div>
+  </section>
+
+  <section class="panel strip" aria-label="Network and board status">
+    <div class="strip-head">
+      <span class="live" id="live"><i aria-hidden="true"></i><span id="live-text">Loading the latest check…</span></span>
+      <span class="facts-inline">Activated at block <b class="mono">3,543,405</b> · now <b class="mono" id="tip">…</b> · branch ID <b class="mono">0x77190AD9</b></span>
     </div>
+    <div class="bar" id="bar" role="img" aria-label="Board status breakdown"></div>
+    <div class="tally" id="tally"></div>
     <div id="banners"></div>
   </section>
 
+  <h2 id="check">Check your wallet</h2>
+  <p class="sub">Both checks run in your browser. Nothing you choose or paste is sent anywhere.</p>
   <div class="tools">
     <section class="panel tool" aria-labelledby="send-title">
-      <h2 id="send-title">Can my wallet send after NU7?</h2>
+      <h3 id="send-title">Can it send?</h3>
+      <p class="sub">Pick your wallet or app to get a yes, not yet or not clear, with what to do next.</p>
       <label for="wallet">Your wallet or app</label>
       <select id="wallet" disabled><option value="">Loading the latest check…</option></select>
       <div id="answer" class="answer" aria-live="polite"></div>
-      <p class="hint">Answered from this board's latest check, in your browser. Your choice isn't sent anywhere.</p>
     </section>
     <section class="panel tool" aria-labelledby="decode-title">
-      <h2 id="decode-title">What does my wallet's error mean?</h2>
-      <label for="err">Paste the error your wallet or node showed</label>
+      <h3 id="decode-title">What does my error mean?</h3>
+      <p class="sub">Paste the error your wallet or node showed.</p>
+      <label for="err">Error text</label>
       <textarea id="err" rows="3" spellcheck="false" autocomplete="off" placeholder="transaction version 4 not supported by the network upgrade Nu7"></textarea>
-      <button type="button" id="explain">Explain</button>
+      <button type="button" class="btn" id="explain">Explain</button>
       <div id="decoded" class="answer" aria-live="polite"></div>
-      <p class="hint">Decoded in your browser; the text is never sent anywhere. Never paste a recovery phrase or a private key into any page.</p>
+      <p class="hint">Never paste a recovery phrase or a private key into any page, this one included.</p>
     </section>
   </div>
 
-  <h2>Upcoming deadlines</h2>
-  <ul class="deadlines" id="deadlines"></ul>
+  <h2 id="board">The board</h2>
+  <p class="sub">Sorted so what's still broken comes first. Open a row for every piece of evidence behind its status.</p>
+  <div class="controls">
+    <input type="search" id="q" placeholder="Search a wallet, library or swap" aria-label="Search the board" autocomplete="off">
+    <div class="chips" role="group" aria-label="Filter by status" id="filters"></div>
+  </div>
+  <div class="panel board">
+    <div class="board-head" aria-hidden="true"><span>Project</span><span>Status</span><span>What's going on</span><span>Evidence</span></div>
+    <div id="rows"><p class="empty">Loading the latest check…</p></div>
+  </div>
+  <div class="tally" id="legend" style="margin-top:12px"></div>
 
-  <h2>The board</h2>
-  <div class="filters" role="group" aria-label="Filter by status" id="filters"></div>
-  <div class="rows" id="rows"><p class="muted">Loading the latest check…</p></div>
+  <h2 id="coming">Coming up</h2>
+  <p class="sub">Dates that matter for anyone running Zcash infrastructure.</p>
+  <ul class="cards" id="deadlines"></ul>
 
-  <h2>What the statuses mean</h2>
-  <ul class="legend">
-    <li><span class="pill s-fixed">Fixed</span><span>A fix is merged, a release is published, the source has the NU7 change, or the issue was closed as done. A release or deploy to users may still be pending; the note says when.</span></li>
-    <li><span class="pill s-in-review">In review</span><span>A fix is open and not merged yet.</span></li>
-    <li><span class="pill s-broken">Broken</span><span>An open issue or the current source code shows the problem, and no fix is open.</span></li>
-    <li><span class="pill s-watch">Watch</span><span>No machine-checkable evidence either way: a dated report, a conflicting source or a related change.</span></li>
-    <li><span class="pill s-unknown">Unknown</span><span>A lookup failed this hour. A failed lookup never counts as fixed or broken.</span></li>
-  </ul>
-
-  <h2>What NU7 changes for integrators</h2>
+  <h2 id="changes">What NU7 changed</h2>
+  <p class="sub">For integrators. If you only use a wallet, the check above is all you need.</p>
   <ol class="facts">
-    <li><b>Version 4 transactions are rejected</b> from activation, transparent-only ones included (ZIP 2003). Build v5 or v6.</li>
-    <li><b>New consensus branch ID</b> <span class="mono">0x77190AD9</span>. v5 and v6 signatures commit to it, so a signer with old constants fails even if it already builds v5.</li>
-    <li><b>Blocks every 25 seconds</b> instead of 75 (ZIP 218). The same number of confirmations now takes a third of the time.</li>
-    <li><b>Sprout funds become unspendable</b>, because Sprout can only be spent in a v4 transaction.</li>
+    <li class="panel"><b>Version 4 transactions are rejected</b>Transparent-only ones included (ZIP 2003). Build v5 or v6.</li>
+    <li class="panel"><b>New branch ID <span class="mono">0x77190AD9</span></b>v5 and v6 signatures commit to it, so a signer with old constants fails even if it already builds v5.</li>
+    <li class="panel"><b>A block every 25 seconds</b>Down from 75 (ZIP 218). The same number of confirmations now takes a third of the time.</li>
+    <li class="panel"><b>Sprout funds are stuck</b>Sprout can only be spent in a v4 transaction, which is no longer valid.</li>
   </ol>
-  <p class="muted">Source: <a href="https://zips.z.cash/zip-0259">ZIP 259</a>. Zebra 7.0.0 is the node release that activates NU7; Zebra 6.4.x stopped itself around 2 November.</p>
-  <p>Did your ZEC withdrawal land shielded? <a href="https://cryppit.github.io/shield-receipt/">Check it with Shield Receipt</a>: paste the txid and the address you gave, and see whether it was paid to the transparent part or landed shielded, and in which pool. Keyless and read-only, also by Cryppit.</p>
+  <p class="src">Source: <a href="https://zips.z.cash/zip-0259">ZIP 259</a>. Zebra 7.0.0 is the node release that activated NU7.</p>
+
+  <div class="panel related">
+    <span><b>Withdrew ZEC from an exchange?</b> <span class="muted">See whether it landed shielded or transparent, and in which pool.</span></span>
+    <a class="go" href="https://cryppit.github.io/shield-receipt/">Shield Receipt →</a>
+  </div>
 
   <footer>
     <p id="checked">Last checked: …</p>
-    <p>Read-only: this page and its checker only read public data (GitHub and the Blockchair explorer). Rows and the rules behind each status are in <a href="https://github.com/cryppit/nu7-readiness">github.com/cryppit/nu7-readiness</a>; corrections are welcome as issues there.</p>
-    <p>Run by <a href="https://github.com/cryppit">Cryppit</a>. Cryppit filed some of the linked items: shapeshift/web #12794 and vultisig-android #6115. Its grant request for the Vultisig/SwapKit swap path (ZCG #513) was withdrawn on 8 Nov, because Vultisig is doing that work itself.</p>
+    <p>What leaves your browser: one request for this board's own data file. The hourly checker reads public GitHub and the Blockchair explorer; this page reads nothing else and stores nothing.</p>
+    <p>Rows and the rules behind each status are in <a href="https://github.com/cryppit/nu7-readiness">github.com/cryppit/nu7-readiness</a>. Corrections with public evidence are welcome as issues.</p>
+    <p>Run by <a href="https://github.com/cryppit">Cryppit</a>. Cryppit filed some of the linked items: shapeshift/web #12794 and vultisig-android #6115. Its grant request for the Vultisig/SwapKit swap path (ZCG #513) was withdrawn on 8 Nov, because Vultisig is doing that work itself. Project names belong to their owners.</p>
   </footer>
 </main>
 <script src="nu7.js"></script>
-<script>
-"use strict";
-const STALE_MS = 8 * 60 * 60 * 1000;
-const LABEL = { fixed: "Fixed", "in-review": "In review", broken: "Broken", watch: "Watch", unknown: "Unknown" };
-const ORDER = ["broken", "in-review", "watch", "unknown", "fixed"];
-const KIND = { blocker: "Issue", fix: "Fix", release: "Release", code: "Code", context: "Related", manual: "Report" };
-const STATE = {
-  open: "open", merged: "merged", closed: "closed, not merged", completed: "closed as done", not_planned: "closed as not planned",
-  released: "published", absent: "not published", found: "found", not_found: "not found", error: "lookup failed", noted: "noted",
-};
-let data = null;
-let filter = "all";
-
-function el(tag, attrs, ...kids) {
-  const n = document.createElement(tag);
-  for (const [k, v] of Object.entries(attrs || {})) n.setAttribute(k, v);
-  for (const k of kids) n.append(k);
-  return n;
-}
-function fmt(n) { return n == null ? "unavailable" : Number(n).toLocaleString("en-US"); }
-function day(s) { return s ? s.slice(0, 10) : ""; }
-
-function signalItem(s) {
-  let state = STATE[s.state] || s.state;
-  if (s.kind === "context" && (s.state === "completed" || s.state === "not_planned")) state = "closed";
-  const text = s.label || s.title || s.ref;
-  const li = el("li", {}, el("b", {}, KIND[s.kind] || s.kind));
-  const a = el("a", { href: s.url, rel: "noopener" }, s.ref || text);
-  li.append(a, document.createTextNode(` · ${state}`));
-  if (s.kind !== "manual" && text && text !== s.ref) li.append(document.createTextNode(` · ${text}`));
-  if (s.kind === "manual") li.append(document.createTextNode(` · ${s.label} · checked ${s.checked}`));
-  if (s.updated_at) li.append(document.createTextNode(` · updated ${day(s.updated_at)}`));
-  return li;
-}
-
-function render() {
-  const rows = document.getElementById("rows");
-  rows.replaceChildren();
-  const list = data.rows
-    .filter((r) => filter === "all" || r.status === filter)
-    .sort((a, b) => ORDER.indexOf(a.status) - ORDER.indexOf(b.status) || a.name.localeCompare(b.name));
-  for (const r of list) {
-    const card = el("article", { class: "row", id: r.id },
-      el("header", {}, el("h3", {}, r.name), el("span", { class: "cat" }, r.category), el("span", { class: `pill s-${r.status}` }, LABEL[r.status])),
-      el("p", {}, r.note),
-      el("ul", {}, ...r.signals.map(signalItem)));
-    rows.append(card);
-  }
-  if (!list.length) rows.append(el("p", { class: "muted" }, "Nothing in this group right now."));
-  for (const b of document.querySelectorAll("#filters button")) b.setAttribute("aria-pressed", String(b.dataset.f === filter));
-}
-
-function filters() {
-  const box = document.getElementById("filters");
-  const groups = [["all", `All (${data.rows.length})`], ...ORDER.map((s) => [s, `${LABEL[s]} (${data.counts[s] || 0})`])];
-  for (const [f, text] of groups) {
-    const b = el("button", { type: "button", "data-f": f, "aria-pressed": "false" }, text);
-    b.addEventListener("click", () => { filter = f; render(); });
-    box.append(b);
-  }
-}
-
-function header() {
-  const c = data.chain || {};
-  document.getElementById("tip").textContent = fmt(c.tip);
-  document.getElementById("left").textContent = c.active ? "0" : c.tip == null ? "unavailable" : fmt(c.blocks_left);
-  document.getElementById("eta").textContent = c.active ? "activated" : c.eta_utc ? `~${c.eta_utc.slice(0, 16).replace("T", " ")}` : "unavailable";
-  const banners = document.getElementById("banners");
-  if (c.active) banners.append(el("p", { class: "banner active" }, "NU7 is active on Mainnet. Version 4 transactions are now rejected."));
-  const age = Date.now() - Date.parse(data.checked_at);
-  if (!(age < STALE_MS)) banners.append(el("p", { class: "banner stale" }, `Stale: this data is from ${data.checked_at.replace("T", " ").replace("Z", " UTC")}, more than 8 hours ago. Statuses may have changed.`));
-  if (c.error) banners.append(el("p", { class: "banner stale" }, "The chain height could not be read in the last check."));
-  document.getElementById("checked").textContent = `Last checked: ${data.checked_at.replace("T", " ").replace("Z", " UTC")}`;
-}
-
-// Every answer below is built with text nodes (el), never innerHTML: pasted text and row data stay text.
-function answerBox(box, cls, title, lines, link) {
-  box.className = `answer ${cls}`;
-  box.replaceChildren(el("p", { class: "verdict" }, title), ...lines.map((l) => el("p", {}, l)));
-  if (link) box.append(link);
-}
-
-function sendCheck() {
-  const select = document.getElementById("wallet");
-  const choices = NU7.pickerRows(data.rows);
-  select.replaceChildren(el("option", { value: "" }, "Choose…"), ...choices.map((c) => el("option", { value: c.id }, c.label)));
-  select.disabled = false;
-  select.addEventListener("change", () => {
-    const box = document.getElementById("answer");
-    const row = data.rows.find((r) => r.id === select.value);
-    if (!row) { box.replaceChildren(); return; }
-    const a = NU7.sendAnswer(row, { stale: !(Date.now() - Date.parse(data.checked_at) < STALE_MS) });
-    const link = el("p", {}, el("a", { href: `#${row.id}` }, "See the evidence on the board"));
-    link.firstChild.addEventListener("click", () => { filter = "all"; render(); });
-    answerBox(box, `a-${a.verdict}`, a.headline, [a.summary, ...a.lines], link);
-  });
-}
-
-function decode() {
-  const box = document.getElementById("decoded");
-  const d = NU7.decodeError(document.getElementById("err").value);
-  if (!d) { box.replaceChildren(); return; }
-  const link = d.source ? el("p", { class: "hint" }, "Source: ", el("a", { href: d.source, rel: "noopener" }, d.source.replace("https://github.com/", ""))) : null;
-  answerBox(box, d.id === "unknown" ? "a-unknown" : "a-decoded", d.title, d.lines, link);
-}
-document.getElementById("explain").addEventListener("click", decode);
-document.getElementById("err").addEventListener("paste", () => setTimeout(decode, 0));
-
-function deadlinesList(chain, checkedAt) {
-  const STATUS = { upcoming: "Upcoming", proposed: "Proposed", passed: "Passed" };
-  document.getElementById("deadlines").replaceChildren(...NU7.deadlines(chain, checkedAt).map((d) => {
-    const links = el("p", { class: "links" });
-    d.links.forEach((l, i) => { if (i) links.append(" · "); links.append(el("a", { href: l.href, rel: "noopener" }, l.text)); });
-    return el("li", {}, el("h3", {}, d.title, el("span", { class: `pill s-${d.status}` }, STATUS[d.status])), ...d.lines.map((t) => el("p", {}, t)), links);
-  }));
-}
-deadlinesList(null, null);
-
-fetch("data/status.json", { cache: "no-store" })
-  .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
-  .then((d) => { data = d; header(); filters(); render(); sendCheck(); deadlinesList(d.chain, d.checked_at); })
-  .catch((e) => {
-    document.getElementById("rows").replaceChildren(el("p", { class: "error" }, `The latest check could not be loaded (${e.message}).`));
-    document.getElementById("wallet").replaceChildren(el("option", { value: "" }, "Unavailable: the latest check could not be loaded"));
-  });
-</script>
+<script src="app.js"></script>
 </body>
 </html>
