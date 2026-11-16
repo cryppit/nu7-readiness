@@ -20,12 +20,12 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#04061a">
 <link rel="alternate" type="application/atom+xml" title="NU7 readiness: status changes" href="feed.xml">
-<link rel="stylesheet" href="style.css?v=3">
+<link rel="stylesheet" href="style.css?v=11">
 </head>
 <body data-page="check">
 <header class="top">
   <div class="wrap">
-    <a class="logo" href="./" aria-label="Cryppit NU7 readiness, overview">Crypp<b>it</b></a>
+    <a class="logo" href="./" aria-label="Cryppit NU7 readiness, overview"><img src="icons/favicon.svg" alt="" width="28" height="28"><span>Crypp<b>it</b></span></a>
     <span class="crumb">NU7 readiness</span>
     <span class="checked" id="top-checked"></span>
   </div>
@@ -40,8 +40,14 @@
     <section class="panel tool" aria-labelledby="send-title">
       <h3 id="send-title">Can it send?</h3>
       <p class="sub">Pick your wallet or app to get a yes, not yet or not clear, with what to do next.</p>
-      <label for="wallet">Your wallet or app</label>
-      <select id="wallet" disabled><option value="">Loading the latest check…</option></select>
+      <label id="wallet-label" for="wallet-btn">Your wallet or app</label>
+      <div class="pick" id="wallet-pick">
+        <button type="button" class="pick-btn empty" id="wallet-btn" aria-haspopup="listbox" aria-expanded="false" aria-controls="wallet-menu" disabled><span class="pick-logo" id="wallet-logo" aria-hidden="true"></span><span class="pick-name" id="wallet-name">Loading the latest check…</span><span class="pick-status" id="wallet-status"></span><span class="chev" aria-hidden="true"></span></button>
+        <div class="pick-menu" id="wallet-menu" hidden>
+          <input type="search" class="pick-search" id="wallet-search" role="combobox" aria-autocomplete="list" aria-expanded="true" aria-controls="wallet-list" aria-label="Search wallets and apps" autocomplete="off" spellcheck="false">
+          <ul class="pick-list" id="wallet-list" role="listbox" aria-labelledby="wallet-label"></ul>
+        </div>
+      </div>
       <div id="answer" class="answer" aria-live="polite"></div>
     </section>
     <section class="panel tool" aria-labelledby="decode-title">
@@ -67,6 +73,6 @@
   </footer>
 </main>
 <script src="nu7.js?v=2"></script>
-<script src="app.js?v=3"></script>
+<script src="app.js?v=8"></script>
 </body>
 </html>

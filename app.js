@@ -128,22 +128,111 @@ function answerBox(box, cls, status, title, lines, extra) {
 }
 
 const VERDICT_CELL = { yes: "fixed", "not-yet": "in-review", no: "broken", unclear: "watch", unknown: "unknown" };
+const PICK_GROUPS = [
+  ["yes", "Can send now", "Works under NU7's rules"],
+  ["not-yet", "Not yet", "Waiting on a release or a fix"],
+  ["unclear", "Not clear", "The public evidence doesn't settle it"],
+];
+const PICK_WORD = { yes: "Yes", "not-yet": "Not yet", no: "Not yet", unclear: "Not clear", unknown: "Unknown" };
+function logoFor(id, name) {
+  return LOGO[id]
+    ? el("span", { class: "pick-logo has-logo", "aria-hidden": "true" }, el("img", { src: `logos/${LOGO[id]}`, alt: "" }))
+    : el("span", { class: "pick-logo", "aria-hidden": "true" }, name.replace(/^(an?|the) /i, "").slice(0, 1).toUpperCase());
+}
+// "Can it send?": a searchable picker in the Cryppit style (button + listbox), grouped by the answer, with logos.
+// Focus stays in the search box; arrow keys move through the list, Enter picks, Escape closes. The pick is kept in
+// the link (#w=<row id>) so an answer can be shared; nothing else is stored or sent.
 function sendCheck() {
-  const select = document.getElementById("wallet");
-  if (!select) return;
-  const choices = NU7.pickerRows(data.rows);
-  select.replaceChildren(el("option", { value: "" }, "Choose…"), ...choices.map((c) => el("option", { value: c.id }, c.label)));
-  select.disabled = false;
-  select.addEventListener("change", () => {
-    const box = document.getElementById("answer");
-    const row = data.rows.find((r) => r.id === select.value);
-    if (!row) { box.replaceChildren(); return; }
+  const btn = document.getElementById("wallet-btn");
+  if (!btn) return;
+  const menu = $("wallet-menu"), search = $("wallet-search"), list = $("wallet-list"), box = $("answer");
+  const items = NU7.pickerRows(data.rows).map((c) => {
+    const row = data.rows.find((r) => r.id === c.id);
     const a = NU7.sendAnswer(row, { stale: stale() });
+    return { id: c.id, label: c.label, row, answer: a, group: a.verdict === "no" ? "not-yet" : a.verdict };
+  });
+  let shown = [], active = -1, chosen = null;
+
+  function answer(item) {
+    const a = item.answer, row = item.row;
     const [who, what] = NEXT[a.verdict] || NEXT.unknown;
     const next = el("p", { class: "next" }, "Who acts next: ", el("b", {}, who), ` · ${what}`);
     const link = el("p", { class: "next" }, el("a", { href: `board.html#${row.id}` }, "See the evidence on the board"));
     answerBox(box, `a-${a.verdict}`, VERDICT_CELL[a.verdict] || "unknown", a.headline, [a.summary, ...a.lines], [next, link]);
+  }
+  function choose(item, focusBtn) {
+    chosen = item;
+    btn.classList.remove("empty");
+    $("wallet-logo").replaceWith(Object.assign(logoFor(item.id, item.label), { id: "wallet-logo" }));
+    $("wallet-name").textContent = item.label;
+    $("wallet-status").replaceChildren(cell(VERDICT_CELL[item.answer.verdict] || "unknown"), ` ${PICK_WORD[item.answer.verdict] || ""}`);
+    answer(item);
+    try { history.replaceState(null, "", `#w=${encodeURIComponent(item.id)}`); } catch { /* the link just won't carry the pick */ }
+    close(focusBtn);
+  }
+  function setActive(i) {
+    active = i;
+    list.querySelectorAll("[role=option]").forEach((o, j) => o.classList.toggle("active", j === i));
+    const opt = list.querySelectorAll("[role=option]")[i];
+    if (opt) { search.setAttribute("aria-activedescendant", opt.id); opt.scrollIntoView({ block: "nearest" }); }
+    else search.removeAttribute("aria-activedescendant");
+  }
+  function render() {
+    const q = search.value.trim().toLowerCase();
+    const match = items.filter((it) => !q || it.label.toLowerCase().includes(q) || it.row.name.toLowerCase().includes(q));
+    shown = [];
+    const parts = [];
+    for (const [g, title, note] of PICK_GROUPS) {
+      const inGroup = match.filter((it) => it.group === g);
+      if (!inGroup.length) continue;
+      parts.push(el("li", { class: "pick-group", role: "presentation" }, el("b", {}, title), el("small", {}, note)));
+      for (const it of inGroup) {
+        const opt = el("li", { class: `pick-row${chosen === it ? " on" : ""}`, role: "option", id: `w-opt-${it.id}`, "aria-selected": String(chosen === it) },
+          logoFor(it.id, it.label), el("span", { class: "pick-label" }, it.label),
+          el("em", {}, cell(VERDICT_CELL[it.answer.verdict] || "unknown"), ` ${PICK_WORD[it.answer.verdict] || ""}`));
+        const idx = shown.length;
+        opt.addEventListener("mousedown", (e) => e.preventDefault());
+        opt.addEventListener("click", () => choose(it, true));
+        opt.addEventListener("mousemove", () => { if (active !== idx) setActive(idx); });
+        shown.push(it);
+        parts.push(opt);
+      }
+    }
+    list.replaceChildren(...(parts.length ? parts : [el("li", { class: "pick-none", role: "presentation" }, "No wallet or app matches. The board lists every tracked project.")]));
+    setActive(shown.length ? Math.max(0, shown.indexOf(chosen)) : -1);
+  }
+  function open() {
+    menu.hidden = false;
+    btn.setAttribute("aria-expanded", "true");
+    search.value = "";
+    render();
+    search.focus();
+  }
+  function close(focusBtn) {
+    if (menu.hidden) return;
+    menu.hidden = true;
+    btn.setAttribute("aria-expanded", "false");
+    if (focusBtn) btn.focus();
+  }
+
+  search.placeholder = `Search ${items.length} wallets and apps`;
+  btn.disabled = false;
+  $("wallet-name").textContent = "Choose your wallet or app";
+  btn.addEventListener("click", () => (menu.hidden ? open() : close(true)));
+  btn.addEventListener("keydown", (e) => { if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); open(); } });
+  search.addEventListener("input", render);
+  search.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowDown") { e.preventDefault(); if (shown.length) setActive((active + 1) % shown.length); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); if (shown.length) setActive((active - 1 + shown.length) % shown.length); }
+    else if (e.key === "Enter") { e.preventDefault(); if (shown[active]) choose(shown[active], true); }
+    else if (e.key === "Escape") { e.preventDefault(); close(true); }
+    else if (e.key === "Tab") close(false);
   });
+  document.addEventListener("click", (e) => { if (!$("wallet-pick").contains(e.target)) close(false); });
+
+  const m = /^#w=([\w.-]+)$/.exec(location.hash);
+  const fromLink = m && items.find((it) => it.id === decodeURIComponent(m[1]));
+  if (fromLink) choose(fromLink, false);
 }
 
 function decode() {
@@ -184,6 +273,23 @@ function wheel() {
   const tip = $("w-tip");
   const ready = data.rows.filter((r) => r.status === "fixed").sort((a, b) => a.name.localeCompare(b.name));
   const rest = data.rows.filter((r) => r.status !== "fixed").sort((a, b) => ORDER.indexOf(a.status) - ORDER.indexOf(b.status) || a.name.localeCompare(b.name));
+  const label = el("div", { class: "w-label", hidden: "", "aria-hidden": "true" });
+  // The name floats just above the hovered logo. The rings stop turning on hover, so the spot stays put.
+  const place = (coin, r) => {
+    const w = box.getBoundingClientRect(), c = coin.getBoundingClientRect();
+    // The wheel's frame cuts off anything outside it, so the card is measured first and kept inside the frame:
+    // above the logo when there's room, otherwise below it, and slid back in near any edge.
+    const frame = (box.closest(".wheel-box") || box).getBoundingClientRect();
+    label.replaceChildren(r.name, el("small", {}, LABEL[r.status]));
+    label.hidden = false;
+    const width = label.offsetWidth, height = label.offsetHeight, gap = 10, pad = 6;
+    let top = c.top - gap - height;
+    if (top < frame.top + pad) top = c.bottom + gap;
+    top = Math.min(Math.max(top, frame.top + pad), frame.bottom - pad - height);
+    const left = Math.min(Math.max(c.left + c.width / 2 - width / 2, frame.left + pad), frame.right - pad - width);
+    label.style.left = `${left - w.left}px`;
+    label.style.top = `${top - w.top}px`;
+  };
   const show = (r) => tip.replaceChildren(el("b", {}, r.name), ` · ${LABEL[r.status]} · ${r.category}`);
   const rings = [["outer", ready], ["inner", rest]].map(([kind, list]) => {
     const ring = el("div", { class: `w-ring ${kind}` });
@@ -193,13 +299,15 @@ function wheel() {
         el("span", { class: `dot s-${r.status}`, "aria-hidden": "true" }, GLYPH[r.status]));
       const coin = el("a", { class: "w-coin", href: `board.html#${r.id}`, "aria-label": `${r.name}: ${LABEL[r.status]}`, title: `${r.name}: ${LABEL[r.status]}` }, face);
       coin.style.setProperty("--a", `${(360 / list.length) * i}deg`);
-      coin.addEventListener("mouseenter", () => show(r));
-      coin.addEventListener("focus", () => show(r));
+      coin.addEventListener("mouseenter", () => { show(r); place(coin, r); });
+      coin.addEventListener("focus", () => { show(r); place(coin, r); });
+      coin.addEventListener("mouseleave", () => { label.hidden = true; });
+      coin.addEventListener("blur", () => { label.hidden = true; });
       ring.append(coin);
     });
     return ring;
   });
-  box.replaceChildren(...rings, el("div", { class: "w-hub" },
+  box.replaceChildren(...rings, label, el("div", { class: "w-hub" },
     el("img", { src: "logos/token-zec.svg", alt: "" }), el("b", {}, `${ready.length} / ${data.rows.length}`), el("small", {}, "ready for NU7")));
   $("w-key").replaceChildren(...["fixed", "in-review", "watch", "broken"].filter((s) => data.counts[s])
     .map((s) => el("span", {}, cell(s), `${LABEL[s]} ${data.counts[s]}`)));
@@ -246,5 +354,5 @@ fetch("data/status.json", { cache: "no-store" })
     if ($("live-text")) $("live-text").textContent = "The latest check could not be loaded";
     if ($("rows")) $("rows").replaceChildren(el("p", { class: "empty error" }, msg));
     if ($("wheel")) $("w-tip").textContent = msg;
-    if ($("wallet")) $("wallet").replaceChildren(el("option", { value: "" }, "Unavailable: the latest check could not be loaded"));
+    if ($("wallet-name")) $("wallet-name").textContent = "Unavailable: the latest check could not be loaded";
   });

@@ -212,9 +212,11 @@
    "id": "mining-infra",
    "name": "sovright mining-infra",
    "category": "Mining",
-   "note": "Open checklist of mining-infrastructure work to finish before Mainnet activation. The final NU7 crates and the pre-activation peer floor merged on 26 Oct (#128, #129); the checklist, last edited 30 Oct, still shows 16 of 27 items open on 15 Nov, including relay and pool-server qualification on NU7 blocks, while ingress fixes keep landing (12–14 Nov).",
+   "note": "NU7 relay clients released on 2 Nov (relay-client-5456ff5), described as the exact binaries deployed in Sovright's four production relay regions, after the final NU7 crates merged on 26 Oct (#128). The pre-activation checklist (#121) is still open with 16 of 27 items unticked, last edited 30 Oct; ingress fixes keep landing (11–14 Nov).",
    "signals": [
-    {"kind": "blocker", "ref": "sovright/mining-infra#121"}
+    {"kind": "release", "ref": "sovright/mining-infra@relay-client-5456ff5", "label": "NU7 relay clients, deployed in production (2 Nov)"},
+    {"kind": "fix", "ref": "sovright/mining-infra#128", "label": "Final NU7 crates pinned for Mainnet"},
+    {"kind": "context", "ref": "sovright/mining-infra#121", "label": "Pre-activation checklist, still open (16 of 27 items unticked)"}
    ]
   },
   {
