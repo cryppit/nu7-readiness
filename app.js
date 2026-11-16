@@ -21,7 +21,7 @@ const NEXT = {
   "not-yet": ["The wallet's team", "has to ship the release. Your ZEC stays safe meanwhile."],
   no: ["The wallet's team", "has to ship a fix. Your ZEC stays safe meanwhile."],
   unclear: ["Nobody can say yet", "open the board row for the evidence."],
-  unknown: ["The checker", "retries at the next hourly run."],
+  unknown: ["The checker", "retries at the next automatic check."],
 };
 let data = null;
 let filter = "all";
@@ -103,7 +103,7 @@ function strip() {
   const c = data.chain || {};
   const total = data.rows.length;
   const ready = data.counts.fixed || 0;
-  $("checked").textContent = `Last checked: ${when(data.checked_at)}. Re-checked every hour.`;
+  $("checked").textContent = `Last checked: ${when(data.checked_at)}. Re-checked automatically several times a day.`;
   $("top-checked").textContent = `checked ${short(day(data.checked_at))}, ${data.checked_at.slice(11, 16)} UTC`;
   if ($("go-board")) $("go-board").textContent = `${total} projects: ${ready} ready, ${total - ready} not yet. Every status with its evidence.`;
   if (!$("tip")) return;
