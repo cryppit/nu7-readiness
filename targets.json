@@ -392,7 +392,8 @@
    "note": "The older hw-app-btc Zcash path picks the branch ID by height and stops at NU6.3, so apps that still sign ZEC through it (ShapeShift patches it) send NU6.3 transactions, which NU7 nodes reject. Ledger Live itself moved to the new signer kit.",
    "signals": [
     {"kind": "code", "ref": "LedgerHQ/ledger-live:libs/ledgerjs/packages/hw-app-btc/src/createTransaction.ts", "pattern": "blockHeight >= ZCASH_ACTIVATION_HEIGHTS\\.NU6_3\\) \\{", "means": "broken", "label": "Newest branch ID is NU6.3"},
-    {"kind": "code", "ref": "LedgerHQ/ledger-live:libs/ledgerjs/packages/hw-app-btc/src/createTransaction.ts", "pattern": "(?i)0x77190ad9", "means": "fixed", "label": "NU7 branch ID present"}
+    {"kind": "code", "ref": "LedgerHQ/ledger-live:libs/ledgerjs/packages/hw-app-btc/src/createTransaction.ts", "pattern": "(?i)0x77190ad9", "means": "fixed", "label": "NU7 branch ID present"},
+    {"kind": "context", "ref": "LedgerHQ/ledger-live#25027", "label": "Issue: NU7 branch ID missing (filed 17 Nov)"}
    ]
   },
   {
@@ -455,6 +456,16 @@
    "note": "The ZEC entry in GLEEC's coin list still builds v4 transactions. A pull request moves it to v5 with the NU7 branch ID and 25-second blocks (#2133, open), but it says it needs a Komodo DeFi Framework build with v5 support, and no NU7 branch ID was found in the framework's source on 16 Nov.",
    "signals": [
     {"kind": "fix", "ref": "GLEECBTC/coins#2133", "label": "ZEC to v5 for NU7 (needs a KDF build with v5 support)"}
+   ]
+  },
+  {
+   "id": "zchat",
+   "name": "ZChat (Android)",
+   "category": "Wallet",
+   "note": "Android Zcash wallet and private messenger. ZChat 2.12.4 and older can't send on Ironwood or NU7: the network rejects their transactions. 2.13.0 (17 Nov) works on NU7; it ships its own build of the official Zcash Android SDK with the NU7 libraries. ZChat says to update in place and never uninstall. Not tested by us.",
+   "user": {"label": "ZChat (Android)", "update": "2.13.0 or later"},
+   "signals": [
+    {"kind": "release", "ref": "decentrathai/zchat-android@v2.13.0"}
    ]
   }
  ]
